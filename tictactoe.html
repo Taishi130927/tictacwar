@@ -20,7 +20,6 @@
     border-color: #999;
     width: 120px;
     height: 120px;
-    font-size: 50px;
     cursor: pointer;
     text-shadow: 3px 3px 2px #aaa;
   }
@@ -33,13 +32,18 @@
     background-color: #c9c9c9;
   }
 
-   td:hover {
+  td:hover {
     background-color: #e8e8e8 !important;
   }
 
-  .chosen {
-    /*color: red;*/
+  .chosen[data-side="◯"] {
+    font-size: 40px;
   }
+
+  .chosen[data-side="×"] {
+    font-size: 80px;
+  }
+
   </style>
 </head>
 <body>
@@ -56,7 +60,7 @@
   $(function(){
     'use strict';
     // Board Initialization
-    var size = 5,
+    var size = 7,
         grid = new Array(size),
         count = 0,
         side = "×",
@@ -104,8 +108,7 @@
             var column1 = parseInt($(this).attr('id').charAt(6));
             grid[row1][column1] = 0;
             count ++;
-            $(this).addClass('chosen').text(side).css('color',sidecolor);
-
+            $(this).addClass('chosen').text(side).css('color',sidecolor).attr('data-side', side);
             socket.emit('emit_from_client', [row1, column1, side, sidecolor]);
             yourTurn = false;
 
@@ -138,7 +141,6 @@
             }, 500);*/
 
             socket.on('emit_from_server', function(data){
-              console.log(data);
 
               var row2 = data[0],
                   column2 = data[1],
@@ -146,7 +148,7 @@
                   datasidecolor = data[3];
               grid[row2][column2] = 1;
               count++;
-              $('#row' + row2 + ' #column' + column2).addClass('chosen').text(dataside).css('color',datasidecolor);
+              $('#row' + row2 + ' #column' + column2).addClass('chosen').text(dataside).css('color',datasidecolor).attr('data-side', dataside);
               yourTurn = true;
 
             });

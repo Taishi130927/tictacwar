@@ -20,6 +20,5 @@ console.log("server listening ...");
 io.sockets.on('connection', function(socket){
     socket.on('emit_from_client', function(data){
         io.sockets.emit('emit_from_server', data)
-        console.log(data);
     });
 });
