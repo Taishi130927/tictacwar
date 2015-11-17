@@ -1,0 +1,43 @@
+body {
+  text-align: center;
+  font-family: arial, sans-serif;
+}
+
+#panel {
+   margin: 50px auto;
+   border-collapse: collapse;
+}
+
+td {
+  border-width: 2px;
+  border-style: solid;
+  border-color: #999;
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+  text-shadow: 3px 3px 2px #aaa;
+}
+
+tr:nth-of-type(odd) td:nth-of-type(odd) {
+  background-color: #c9c9c9;
+}
+
+tr:nth-of-type(even) td:nth-of-type(even) {
+  background-color: #c9c9c9;
+}
+
+td:hover {
+  background-color: #e8e8e8 !important;
+}
+
+.chosen[data-side="◯"] {
+  font-size: 40px;
+}
+
+.chosen[data-side="×"] {
+  font-size: 80px;
+}
+
+#roomSelector {
+  margin: 30px auto;
+}

@@ -2,7 +2,7 @@ var app = require('http').createServer(handler),
     io = require('socket.io').listen(app)
     fs = require('fs');
 app.listen(1337);
-io.set('log level', 1);
+//io.set('log level', 1);
 function handler(req, res) {
     fs.readFile(__dirname + '/tictactoe.html', 'utf-8', function(err, data) {
         if (err) {
@@ -18,6 +18,10 @@ function handler(req, res) {
 console.log("server listening ...");
 
 io.sockets.on('connection', function(socket){
+    socket.on('emit_room', function(data){
+        console.log(data);
+        // io.sockets.emit('emit_from_server', data)
+    });
     socket.on('emit_from_client', function(data){
         io.sockets.emit('emit_from_server', data)
     });
