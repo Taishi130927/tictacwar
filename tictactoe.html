@@ -37,9 +37,7 @@
     var socket = io.connect();
 
     // Board Initialization
-    var size = 7,
-        grid = new Array(size),
-        count = 0,
+    var count = 0,
         side = "×",
         sidecolor = 'blue',
         yourTurn = false,
@@ -47,10 +45,11 @@
         timerId,
         timeCount = 0;
 
+    var board = new Board(7);
 
-    function countOn(tc){
+    function countOn(tc) {
 
-      if (tc <= 300){
+      if (tc <= 300) {
 
         if (tc === 200) {
           $('.progress-bar').addClass('progress-bar-warning');
@@ -58,7 +57,7 @@
           $('.progress-bar').addClass('progress-bar-danger');
         }
 
-        timerId = setTimeout(function(){
+        timerId = setTimeout(function() {
 
                 $('.progress-bar').css('width', 100 - tc * 100 / 300 + '%');
                 countOn(tc + 1);
@@ -72,7 +71,7 @@
       }
     }
 
-    $('#roomSelector').change(function(){
+    $('#roomSelector').change(function() {
 
       socket.emit('emit_room', $(this).val());
       if (side === "◯") {
@@ -80,7 +79,7 @@
       }
     });
 
-    $('#sideSelector').change(function(){
+    $('#sideSelector').change(function() {
 
       side = $(this).val();
       sidecolor = (side === "◯")? 'red' : 'blue';
@@ -88,18 +87,11 @@
 
     });
 
-
-    for (i = 0; i < size; i++){
-
-      grid[i] = new Array(size);
-
-    }
-
-    for (var i = 0; i < size; i++){
+    for (var i = 0; i < board.size; i++) {
 
       $('#panel').append('<tr id=row' + i +'></tr>');
 
-        for (var j = 0; j < size; j++){
+        for (var j = 0; j < board.size; j++) {
 
           $('#row' + i).append('<td id=column' + j +'>  </td>');
         }
@@ -107,7 +99,7 @@
 
       //Game Procedures
 
-      $('td').click(function(){
+      $('td').click(function() {
 
         if (yourTurn){
 
@@ -119,7 +111,7 @@
             //Your Move
             var row1 = parseInt($(this).parent().attr('id').charAt(3));
             var column1 = parseInt($(this).attr('id').charAt(6));
-            grid[row1][column1] = 0;
+            board.grid[row1][column1] = 0;
             count ++;
             $(this).addClass('chosen').text(side).css('color',sidecolor).attr('data-side', side);
 
@@ -135,8 +127,8 @@
             clearTimeout(timerId);
             $('.progress-bar').css('width', '100%');
             //countOn(timeCount);
-
-            if (!gameOn(grid, row1, column1, 0)){
+            var yourMove = new Move(row1, column1, 0)
+            if (!board.gameOn(yourMove)) {
                 alert('You win!');
                 location.href = "";
               }
@@ -153,30 +145,14 @@
 
 
       });
-            //Enemy Move
-            /*setTimeout(function(){
 
-              var om = opponentMove(grid);
-              var row2 = om[0];
-              var column2 = om[1];
-              grid[row2][column2] = 1;
-              count++;
-              $('#row' + row2 + ' #column' + column2).addClass('chosen').text('×').css('color','blue');
-              yourTurn = true;
+            socket.on('emit_from_enemy', function(data) {
 
-              if (!gameOn(grid, row2, column2, 1)){
-                alert('You lose!');
-                location.href = "";
-              }
-
-            }, 500);*/
-
-            socket.on('emit_from_enemy', function(data){
-
-              grid[data.row][data.column] = 1;
+              board.grid[data.row][data.column] = 1;
               count++;
               $('#row' + data.row + ' #column' + data.column).addClass('chosen').text(data.side).css('color',data.sidecolor).attr('data-side', data.side);
-              if (!gameOn(grid, data.row, data.column, 1)){
+              var enemyMove = new Move(data.row, data.column, 1)
+              if (!board.gameOn(enemyMove)) {
                 alert('You lose!');
                 location.href = "";
               }
