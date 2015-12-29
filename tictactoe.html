@@ -30,22 +30,19 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="http://private.myvagrant/procedures.js"></script>
+  <script src="http://private.myvagrant/class.js"></script>
   <script>
   $(function(){
     'use strict';
     var socket = io.connect();
 
     // Board Initialization
-    var count = 0,
-        side = "×",
-        sidecolor = 'blue',
-        yourTurn = false,
-        game = true,
+    var game = true,
         timerId,
         timeCount = 0;
 
-    var board = new Board(7);
+    var player = new Player("×", 'blue', false),
+        board = new Board(7);
 
     function countOn(tc) {
 
@@ -74,16 +71,16 @@
     $('#roomSelector').change(function() {
 
       socket.emit('emit_room', $(this).val());
-      if (side === "◯") {
+      if (player.side === "◯") {
         countOn(timeCount);
       }
     });
 
     $('#sideSelector').change(function() {
 
-      side = $(this).val();
-      sidecolor = (side === "◯")? 'red' : 'blue';
-      yourTurn = (side === "◯");
+      player.side = $(this).val();
+      player.sidecolor = (player.side === "◯")? 'red' : 'blue';
+      player.myTurn = (player.side === "◯");
 
     });
 
@@ -101,39 +98,37 @@
 
       $('td').click(function() {
 
-        if (yourTurn){
+        if (player.myTurn){
 
           if ($(this).hasClass('chosen')){
 
             alert('Invalid move!');
 
           } else {
-            //Your Move
+            //My Move
             var row1 = parseInt($(this).parent().attr('id').charAt(3));
             var column1 = parseInt($(this).attr('id').charAt(6));
-            board.grid[row1][column1] = 0;
-            count ++;
-            $(this).addClass('chosen').text(side).css('color',sidecolor).attr('data-side', side);
+            var myMove = new Move(row1, column1, 0);
+            board.update(myMove);
+            $(this).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
 
             socket.json.emit('emit_from_client', {
               room: $('#roomSelector').val(),
               row: row1,
               column: column1,
-              side: side,
-              sidecolor: sidecolor
+              side: player.side,
+              sidecolor: player.sidecolor
             });
 
             timeCount = 0;
             clearTimeout(timerId);
             $('.progress-bar').css('width', '100%');
-            //countOn(timeCount);
-            var yourMove = new Move(row1, column1, 0)
-            if (!board.gameOn(yourMove)) {
+            if (!board.gameOn(myMove)) {
                 alert('You win!');
                 location.href = "";
               }
 
-            yourTurn = false;
+            player.myTurn = false;
 
           }
 
@@ -148,15 +143,14 @@
 
             socket.on('emit_from_enemy', function(data) {
 
-              board.grid[data.row][data.column] = 1;
-              count++;
+              var enemyMove = new Move(data.row, data.column, 1);
+              board.update(enemyMove);
               $('#row' + data.row + ' #column' + data.column).addClass('chosen').text(data.side).css('color',data.sidecolor).attr('data-side', data.side);
-              var enemyMove = new Move(data.row, data.column, 1)
               if (!board.gameOn(enemyMove)) {
                 alert('You lose!');
                 location.href = "";
               }
-              yourTurn = true;
+              player.myTurn = true;
 
             });
 
