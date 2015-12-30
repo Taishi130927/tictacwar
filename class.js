@@ -1,4 +1,13 @@
- Board = function(size) {
+Player = function(side, sidecolor, myturn) {
+
+  this.side = side;
+  this.sidecolor = sidecolor;
+  this.myturn = myturn;
+
+}
+
+
+Board = function(size) {
 
   this.size = size;
   var grid = new Array(size);
