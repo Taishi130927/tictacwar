@@ -110,14 +110,12 @@
             var column1 = parseInt($(this).attr('id').charAt(6));
             var myMove = new Move(row1, column1, 0);
             board.update(myMove);
-            $(this).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
+            board.display(player, myMove);
 
             socket.json.emit('emit_from_client', {
               room: $('#roomSelector').val(),
-              row: row1,
-              column: column1,
-              side: player.side,
-              sidecolor: player.sidecolor
+              enemyMove: myMove,
+              enemy: player
             });
 
             timeCount = 0;
@@ -142,11 +140,10 @@
       });
 
             socket.on('emit_from_enemy', function(data) {
-
-              var enemyMove = new Move(data.row, data.column, 1);
-              board.update(enemyMove);
-              $('#row' + data.row + ' #column' + data.column).addClass('chosen').text(data.side).css('color',data.sidecolor).attr('data-side', data.side);
-              if (!board.gameOn(enemyMove)) {
+              console.log(data);
+              board.update(data.enemyMove);
+             board.display(data.enemy, data.enemyMove);
+              if (!board.gameOn(data.enemyMove)) {
                 alert('You lose!');
                 location.href = "";
               }

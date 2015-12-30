@@ -32,6 +32,12 @@ Board.prototype.update = function (move) {
   this.grid[move.row][move.column] = move.binaryside;
 }
 
+Board.prototype.display = function(player, move) {
+
+  $('#row' + move.row + ' #column' + move.column).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
+
+}
+
 Board.prototype.allyCounter = function(move, count, inc, type) {
 
   var row = move.row,
