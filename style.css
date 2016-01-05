@@ -60,6 +60,23 @@ html {
     padding-top: 100%;
   }
 
+  .icon1 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 128px !important;
+    color: #e3671b;
+    margin: 5% 10%;
+  }
+
+  .icon2 {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 128px !important;
+    color: skyblue;
+    margin: 35% 5%;
+  }
 
   #panel {
     position: absolute;
@@ -69,7 +86,7 @@ html {
     right: 0;
     width: 40%;
     height: 40%;
-    margin: 50px auto;
+    margin: 5% auto;
     border-collapse: collapse;
   }
 
