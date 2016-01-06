@@ -1,3 +1,22 @@
+Hero = function(heroname){
+
+  var heroes = {
+    warrior: 0,
+    mage: 1,
+    hunter: 2,
+    rogue: 3,
+    warlock: 4,
+    priest: 5,
+    pirate: 6,
+    paladin: 7,
+    ninja: 8
+  };
+
+  this.name = heroname;
+  this.num = heroes[heroname];
+
+}
+
 Player = function(side, sidecolor, myturn) {
 
   this.side = side;
