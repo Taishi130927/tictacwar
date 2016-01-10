@@ -111,11 +111,11 @@ html {
   }
 
   .chosen[data-side="◯"] {
-    font-size: 40px;
+    font-size: 20px;
   }
 
   .chosen[data-side="×"] {
-    font-size: 80px;
+    font-size: 30px;
   }
 
   #roomSelector {

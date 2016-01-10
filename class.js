@@ -12,16 +12,22 @@ Hero = function(heroname){
     ninja: 8
   };
 
-  this.name = heroname;
-  this.num = heroes[heroname];
+  this.hname = heroname;
+  this.hid = heroes[heroname];
 
 }
 
-Player = function(side, sidecolor, myturn) {
+Player = function(id) {
 
-  this.side = side;
-  this.sidecolor = sidecolor;
-  this.myturn = myturn;
+  var properties = [
+      ["◯", "red", true],
+      ["×", "blue", false]
+    ];
+
+  this.id = id;
+  this.side = properties[id][0];
+  this.sidecolor = properties[id][1];
+  this.myTurn = properties[id][2];
 
 }
 
@@ -38,12 +44,13 @@ Board = function(size) {
   this.grid = grid;
 
   this.update = function (move) {
-    this.grid[move.row][move.column] = move.binaryside;
+    this.grid[move.row][move.column] = move.player.id;
   }
 
-  this.display = function(player, move) {
+  this.display = function(move) {
 
-  $('#row' + move.row + ' #column' + move.column).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
+    var player = move.player;
+    $('#row' + move.row + ' #column' + move.column).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
 
   }
 
@@ -51,7 +58,7 @@ Board = function(size) {
 
     var row = move.row,
         column = move.column,
-        side = move.binaryside;
+        side = move.player.id;
 
     if (type === "vertical"){
 
@@ -60,7 +67,7 @@ Board = function(size) {
         if (this.grid[row + inc][column] === side) {
 
           count += 1;
-          var move = new Move(row + inc, column, side);
+          var move = new Move(row + inc, column, move.player);
           return this.allyCounter(move, count, inc, type);
 
         } else {
@@ -78,7 +85,7 @@ Board = function(size) {
         if (this.grid[row][column + inc] === side) {
 
           count += 1;
-          var move = new Move(row, column + inc, side);
+          var move = new Move(row, column + inc, move.player);
           return this.allyCounter(move, count, inc, type);
 
         } else {
@@ -96,7 +103,7 @@ Board = function(size) {
         if (this.grid[row + inc][column + inc] === side) {
 
           count += 1;
-          var move = new Move(row + inc, column + inc, side);
+          var move = new Move(row + inc, column + inc, move.player);
           return this.allyCounter(move, count, inc, type);
 
         } else {
@@ -114,7 +121,7 @@ Board = function(size) {
         if (this.grid[row - inc][column + inc] === side) {
 
           count += 1;
-          var move = new Move(row - inc, column + inc, side);
+          var move = new Move(row - inc, column + inc, move.player);
           return this.allyCounter(move, count, inc, type);
 
 
@@ -155,11 +162,11 @@ Board = function(size) {
 
 }
 
- Move = function(row, column, binaryside) {
+ Move = function(row, column, player) {
 
     this.row = row;
     this.column = column;
-    this.binaryside = binaryside;
+    this.player = player;
 
 }
 

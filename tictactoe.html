@@ -54,7 +54,7 @@
         timerId,
         timeCount = 0;
 
-    var player = new Player("×", 'blue', false),
+    var player = new Player(1),
         board = new Board(7);
 
     function countOn(tc) {
@@ -84,16 +84,16 @@
     $('#roomSelector').change(function() {
 
       socket.emit('emit_room', $(this).val());
-      if (player.side === "◯") {
+      if (player.id === 0) {
         countOn(timeCount);
       }
+
     });
 
     $('#sideSelector').change(function() {
 
-      player.side = $(this).val();
-      player.sidecolor = (player.side === "◯")? 'red' : 'blue';
-      player.myTurn = (player.side === "◯");
+      var newid = (player.id + 1) % 2;
+      player = new Player(newid);
 
     });
 
@@ -121,14 +121,13 @@
             //My Move
             var row1 = parseInt($(this).parent().attr('id').charAt(3));
             var column1 = parseInt($(this).attr('id').charAt(6));
-            var myMove = new Move(row1, column1, 0);
+            var myMove = new Move(row1, column1, player);
             board.update(myMove);
-            board.display(player, myMove);
+            board.display(myMove);
 
             socket.json.emit('emit_from_client', {
               room: $('#roomSelector').val(),
-              enemyMove: myMove,
-              enemy: player
+              enemyMove: myMove
             });
 
             timeCount = 0;
@@ -140,6 +139,8 @@
               }
 
             player.myTurn = false;
+            // player.side = (player.side === "◯")?  "×" : "◯";
+            // player.sidecolor = (player.sidecolor === "red")? "blue" : "red";
 
           }
 
@@ -153,9 +154,8 @@
       });
 
             socket.on('emit_from_enemy', function(data) {
-              console.log(data);
               board.update(data.enemyMove);
-             board.display(data.enemy, data.enemyMove);
+              board.display(data.enemyMove);
               if (!board.gameOn(data.enemyMove)) {
                 alert('You lose!');
                 location.href = "";
