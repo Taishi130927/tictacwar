@@ -58,7 +58,6 @@ Board = function(size) {
 
     this.subGrid[move.globalRow][move.globalColumn].update(move);
     this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
-    console.log(this.globalGrid);
 
   }
 
@@ -130,41 +129,47 @@ SubBoard = function(size) {
 
   this.occupationUpdate = function(move) {
 
-    var row = move.subRow,
-        column = move.subColumn,
-        side = move.player.id;
+    if (move.player.id === this.occupant) {
+      return this.occupant;
+    } else {
 
-    var horiz = true,
-        vert = true,
-        diag1 = (row === column),
-        diag2 = (row === this.size - 1 - column);
+      var row = move.subRow,
+          column = move.subColumn,
+          side = move.player.id;
 
-    for (var i = 0; i < this.size; i++){
-
-      if (this.grid[row][i] !== side){
-        horiz = false;
-      }
-
-      if (this.grid[i][column] !== side){
-        vert = false;
-      }
-    }
-
-    if (diag1 || diag2){
+      var horiz = true,
+          vert = true,
+          diag1 = (row === column),
+          diag2 = (row === this.size - 1 - column);
 
       for (var i = 0; i < this.size; i++){
 
-        if (this.grid[i][i] !== side){
-          diag1 = false;
+        if (this.grid[row][i] !== side){
+          horiz = false;
         }
 
-        if (this.grid[i][this.size - 1 -i] !== side){
-          diag2 = false;
+        if (this.grid[i][column] !== side){
+          vert = false;
+        }
+      }
+
+      if (diag1 || diag2){
+
+        for (var i = 0; i < this.size; i++){
+
+          if (this.grid[i][i] !== side){
+            diag1 = false;
+          }
+
+          if (this.grid[i][this.size - 1 -i] !== side){
+            diag2 = false;
+          }
         }
       }
     }
 
     if (horiz || vert || diag1 || diag2) {
+      this.occupant = move.player.id
       return move.player.id;
     } else {
       return null;

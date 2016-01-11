@@ -130,13 +130,43 @@
               enemyMove: myMove
             });
 
+            setTimeout(function() {
+
+              var srow, scolumn, grow, gcolumn;
+
+              while (true) {
+
+                srow = Math.floor(Math.random(1) * board.subSize);
+                scolumn = Math.floor(Math.random(1) * board.subSize);
+                grow = Math.floor(Math.random(1) * board.subSize);
+                gcolumn = Math.floor(Math.random(1) * board.subSize);
+                var check = board.subGrid[grow][gcolumn].grid[srow][scolumn];
+                if (!(check === 1 || check === 0)) {
+                  break;
+                }
+              }
+
+              var row = grow * 3 + srow,
+                  column = gcolumn * 3 + scolumn;
+              var rmove = new Move(row, column, player);
+              board.update(rmove);
+              board.display(rmove);
+
+              socket.json.emit('emit_from_client', {
+                room: $('#roomSelector').val(),
+                enemyMove: rmove
+              });
+
+
+            }, 500);
+
             timeCount = 0;
             clearTimeout(timerId);
             $('.progress-bar').css('width', '100%');
             if (!board.gameOn(myMove)) {
                 alert('You win!');
                 location.href = "";
-              }
+            }
 
             player.myTurn = false;
             // player.side = (player.side === "◯")?  "×" : "◯";
