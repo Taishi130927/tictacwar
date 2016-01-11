@@ -35,6 +35,87 @@ Player = function(id) {
 Board = function(size) {
 
   this.size = size;
+  var subSize = Math.sqrt(size);
+  this.subSize = subSize;
+  var subGrid = new Array(subSize),
+      globalGrid = new Array(subSize);
+
+  for (var i = 0; i < subSize; i++){
+
+    subGrid[i] = new Array(subSize);
+    globalGrid[i] = new Array(subSize);
+
+    for (var j = 0; j < size; j++){
+      subGrid[i][j] = new SubBoard(subSize);
+    }
+
+  }
+
+  this.subGrid = subGrid;
+  this.globalGrid = globalGrid;
+
+  this.update = function (move) {
+
+    this.subGrid[move.globalRow][move.globalColumn].update(move);
+    this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
+    console.log(this.globalGrid);
+
+  }
+
+  this.display = function(move) {
+
+    var player = move.player;
+    var row = 3 * move.globalRow + move.subRow,
+        column = 3 * move.globalColumn + move.subColumn;
+    $('#row' + row + ' #column' + column).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
+
+  }
+
+  this.gameOn = function(move) {
+
+    var row = move.globalRow,
+        column = move.globalColumn,
+        side = move.player.id;
+
+    var horiz = true,
+        vert = true,
+        diag1 = (row === column),
+        diag2 = (row === this.size - 1 - column);
+
+    for (var i = 0; i < this.subSize; i++){
+
+      if (this.globalGrid[row][i] !== side){
+        horiz = false;
+      }
+
+      if (this.globalGrid[i][column] !== side){
+        vert = false;
+      }
+    }
+
+    if (diag1 || diag2){
+
+      for (var i = 0; i < this.subSize; i++){
+
+        if (this.globalGrid[i][i] !== side){
+          diag1 = false;
+        }
+
+        if (this.globalGrid[i][this.subSize - 1 -i] !== side){
+          diag2 = false;
+        }
+      }
+    }
+
+    return !(horiz || vert || diag1 || diag2);
+
+  }
+}
+
+SubBoard = function(size) {
+
+  this.size = size;
+  this.occupant = null;
   var grid = new Array(size);
 
   for (var i = 0; i < size; i++){
@@ -44,128 +125,60 @@ Board = function(size) {
   this.grid = grid;
 
   this.update = function (move) {
-    this.grid[move.row][move.column] = move.player.id;
+    this.grid[move.subRow][move.subColumn] = move.player.id;
   }
 
-  this.display = function(move) {
+  this.occupationUpdate = function(move) {
 
-    var player = move.player;
-    $('#row' + move.row + ' #column' + move.column).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
-
-  }
-
-  this.allyCounter = function(move, count, inc, type) {
-
-    var row = move.row,
-        column = move.column,
+    var row = move.subRow,
+        column = move.subColumn,
         side = move.player.id;
 
-    if (type === "vertical"){
+    var horiz = true,
+        vert = true,
+        diag1 = (row === column),
+        diag2 = (row === this.size - 1 - column);
 
-      if (row + inc >= 0 && row + inc < this.size) {
+    for (var i = 0; i < this.size; i++){
 
-        if (this.grid[row + inc][column] === side) {
-
-          count += 1;
-          var move = new Move(row + inc, column, move.player);
-          return this.allyCounter(move, count, inc, type);
-
-        } else {
-          return count;
-        }
-
-      } else {
-        return count;
+      if (this.grid[row][i] !== side){
+        horiz = false;
       }
 
-    } else if (type === "horizontal") {
+      if (this.grid[i][column] !== side){
+        vert = false;
+      }
+    }
 
-      if (column + inc >= 0 && column + inc < this.size) {
+    if (diag1 || diag2){
 
-        if (this.grid[row][column + inc] === side) {
+      for (var i = 0; i < this.size; i++){
 
-          count += 1;
-          var move = new Move(row, column + inc, move.player);
-          return this.allyCounter(move, count, inc, type);
-
-        } else {
-          return count;
+        if (this.grid[i][i] !== side){
+          diag1 = false;
         }
 
-      } else {
-        return count;
-      }
-
-    } else if (type === "rdiagonal") {
-
-      if (row + inc >= 0 && row + inc < this.size && column + inc >= 0 && column + inc < this.size) {
-
-        if (this.grid[row + inc][column + inc] === side) {
-
-          count += 1;
-          var move = new Move(row + inc, column + inc, move.player);
-          return this.allyCounter(move, count, inc, type);
-
-        } else {
-          return count;
+        if (this.grid[i][this.size - 1 -i] !== side){
+          diag2 = false;
         }
-
-      } else {
-        return count;
       }
+    }
 
+    if (horiz || vert || diag1 || diag2) {
+      return move.player.id;
     } else {
-
-      if (row - inc >= 0 && row - inc < this.size && column + inc >= 0 && column + inc < this.size) {
-
-        if (this.grid[row - inc][column + inc] === side) {
-
-          count += 1;
-          var move = new Move(row - inc, column + inc, move.player);
-          return this.allyCounter(move, count, inc, type);
-
-
-        } else {
-          return count;
-        }
-
-      } else {
-        return count;
-      }
+      return null;
     }
+
   }
-
-
-  this.gameOn = function(move) {
-
-    var goalnum = 4;
-
-    if (this.allyCounter(move, 1, 1, "horizontal") + this.allyCounter(move, 1, -1, "horizontal")  >= goalnum + 1) {
-      return false;
-    }
-
-    if (this.allyCounter(move, 1, 1, "vertical") + this.allyCounter(move, 1, -1, "vertical") >= goalnum + 1) {
-      return false;
-    }
-
-    if (this.allyCounter(move, 1, 1, "rdiagonal") + this.allyCounter(move, 1, -1, "rdiagonal") >= goalnum + 1) {
-      return false;
-    }
-
-   if (this.allyCounter(move, 1, 1, "ldiagonal") + this.allyCounter(move, 1, -1, "ldiagonal") >= goalnum + 1) {
-      return false;
-    }
-
-    return true;
-  }
-
-
 }
 
  Move = function(row, column, player) {
 
-    this.row = row;
-    this.column = column;
+    this.globalRow = Math.floor(row / 3);
+    this.globalColumn = Math.floor(column / 3);
+    this.subRow = row % 3;
+    this.subColumn = column % 3;
     this.player = player;
 
 }

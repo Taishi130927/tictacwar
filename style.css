@@ -64,18 +64,18 @@ html {
     position: absolute;
     top: 0;
     left: 0;
-    font-size: 128px !important;
+    font-size: 32px !important;
     color: #e3671b;
-    margin: 5% 10%;
+    margin: 5% 5%;
   }
 
   .icon2 {
     position: absolute;
     top: 0;
     right: 0;
-    font-size: 128px !important;
+    font-size: 32px !important;
     color: skyblue;
-    margin: 35% 5%;
+    margin: 65% 5%;
   }
 
   #panel {
@@ -84,16 +84,16 @@ html {
     left: 0;
     bottom: 0;
     right: 0;
-    width: 40%;
-    height: 40%;
+    width: 70%;
+    height: 70%;
     margin: 5% auto;
     border-collapse: collapse;
   }
 
   td {
     border: solid 2px #999;
-    width: 12%;
-    height: 12%;
+    width: 11%;
+    height: 11%;
     cursor: pointer;
     text-shadow: 3px 3px 2px #aaa;
   }
@@ -104,6 +104,22 @@ html {
 
   tr:nth-of-type(even) td:nth-of-type(even) {
     background-color: #c9c9c9;
+  }
+
+  tr:nth-of-type(3n) {
+    border-bottom: solid 4px #999;
+  }
+
+  td:nth-of-type(3n) {
+    border-right: solid 4px #999;
+  }
+
+  tr:nth-of-type(1) {
+    border-top: solid 4px #999;
+  }
+
+  td:nth-of-type(1) {
+    border-left: solid 4px #999;
   }
 
   td:hover {
