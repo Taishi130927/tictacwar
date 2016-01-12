@@ -2,6 +2,7 @@ Game = function(player, board) {
 
   this.player = player;
   this.board = board;
+  this.socket = io.connect();
   this.timerId;
   this.timeCount = 0;
 
@@ -38,6 +39,64 @@ Game = function(player, board) {
     } else {
         clearTimeout(this.timerId);
     }
+  }
+
+  this.processMove = function(move) {
+
+    this.board.update(move);
+    this.board.display(move);
+
+    if (move.player === this.player) {
+
+      this.socket.json.emit('emit_from_client', {
+
+        room: $('#roomSelector').val(),
+        enemyMove: move
+
+      });
+
+      if (!this.board.gameOn(move)) {
+
+        alert('You win!');
+        location.href = "";
+      }
+
+      this.player.myTurn = false;
+
+    } else {
+
+      if (!this.board.gameOn(move)) {
+
+        alert('You lose!');
+        location.href = "";
+
+      }
+
+       if (move.random) this.player.myTurn = true;
+
+    }
+  }
+
+  this.generateRandomMove = function() {
+
+    var srow, scolumn, grow, gcolumn;
+
+    while (true) {
+
+      srow = Math.floor(Math.random(1) * this.board.subSize);
+      scolumn = Math.floor(Math.random(1) * this.board.subSize);
+      grow = Math.floor(Math.random(1) * this.board.subSize);
+      gcolumn = Math.floor(Math.random(1) * this.board.subSize);
+      var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
+
+      if (!(check === 1 || check === 0)) break;
+    }
+
+    var row = grow * 3 + srow,
+        column = gcolumn * 3 + scolumn;
+    var rmove = new Move(row, column, this.player, true);
+
+    return rmove;
   }
 }
 
@@ -231,5 +290,3 @@ SubBoard = function(size) {
     this.random = random;
 
 }
-
-

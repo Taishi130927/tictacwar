@@ -26,11 +26,6 @@
     <option value="ninja">Ninja</option>
   </select>
 
-  <!-- <select id="sideSelector">
-    <option value="0">◯</option>
-    <option value="1" selected>×</option>
-  </select> -->
-
   <button id="enter">Enter</button>
 
   <div class="progress">
@@ -49,7 +44,7 @@
   <script>
   $(function(){
     'use strict';
-    var socket = io.connect();
+
     var board = new Board(9);
     var initialized = false;
 
@@ -59,10 +54,10 @@
     game.initialize();
 
     $('#enter').click(function() {
-      socket.emit('emit_room', $('#roomSelector').val());
+      game.socket.emit('emit_room', $('#roomSelector').val());
     });
 
-    socket.on('emit_id', function(data) {
+    game.socket.on('emit_id', function(data) {
 
         if (!initialized) {
 
@@ -72,13 +67,11 @@
 
         }
       });
-
-
       //Game Procedures
 
       $('td').click(function() {
 
-        if (player.myTurn){
+        if (game.player.myTurn){
 
           if ($(this).hasClass('chosen')){
 
@@ -89,58 +82,18 @@
             var row1 = parseInt($(this).parent().attr('id').charAt(3)),
                 column1 = parseInt($(this).attr('id').charAt(6));
             var myMove = new Move(row1, column1, player, false);
-            board.update(myMove);
-            board.display(myMove);
-
-            socket.json.emit('emit_from_client', {
-              room: $('#roomSelector').val(),
-              enemyMove: myMove
-            });
+            game.processMove(myMove);
 
             game.timeCount = 0;
             clearTimeout(game.timerId);
             $('.progress-bar').css('width', '100%');
-            if (!board.gameOn(myMove)) {
-                alert('You win!');
-                location.href = "";
-            }
-
-            player.myTurn = false;
 
             setTimeout(function() {
 
-              var srow, scolumn, grow, gcolumn;
-
-              while (true) {
-
-                srow = Math.floor(Math.random(1) * board.subSize);
-                scolumn = Math.floor(Math.random(1) * board.subSize);
-                grow = Math.floor(Math.random(1) * board.subSize);
-                gcolumn = Math.floor(Math.random(1) * board.subSize);
-                var check = board.subGrid[grow][gcolumn].grid[srow][scolumn];
-                if (!(check === 1 || check === 0)) {
-                  break;
-                }
-              }
-
-              var row = grow * 3 + srow,
-                  column = gcolumn * 3 + scolumn;
-              var rmove = new Move(row, column, player, true);
-              board.update(rmove);
-              board.display(rmove);
-
-              socket.json.emit('emit_from_client', {
-                room: $('#roomSelector').val(),
-                enemyMove: rmove
-              });
-
-              if (!board.gameOn(myMove)) {
-                alert('You win!');
-                location.href = "";
-              }
+              var rmove = game.generateRandomMove();
+              game.processMove(rmove);
 
             }, 500);
-
 
           }
 
@@ -149,20 +102,10 @@
           alert('It\'s not your turn!');
 
         }
-
-
       });
 
-      socket.on('emit_from_enemy', function(data) {
-        board.update(data.enemyMove);
-        board.display(data.enemyMove);
-        if (!board.gameOn(data.enemyMove)) {
-          alert('You lose!');
-          location.href = "";
-        }
-
-        if (data.enemyMove.random) player.myTurn = true;
-
+      game.socket.on('emit_from_enemy', function(data) {
+        game.processMove(data.enemyMove);
       });
 
 
