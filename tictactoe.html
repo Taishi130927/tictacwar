@@ -26,10 +26,12 @@
     <option value="ninja">Ninja</option>
   </select>
 
-  <select id="sideSelector">
-    <option>◯</option>
-    <option selected>×</option>
-  </select>
+  <!-- <select id="sideSelector">
+    <option value="0">◯</option>
+    <option value="1" selected>×</option>
+  </select> -->
+
+  <button id="enter">Enter</button>
 
   <div class="progress">
     <div class="progress-bar"></div>
@@ -48,64 +50,29 @@
   $(function(){
     'use strict';
     var socket = io.connect();
+    var board = new Board(9);
+    var initialized = false;
 
-    // Board Initialization
-    var game = true,
-        timerId,
-        timeCount = 0;
+    var player = new Player(0);
+    var game = new Game(player, board);
+    // Game Initialization
+    game.initialize();
 
-    var player = new Player(1),
-        board = new Board(9);
-
-    function countOn(tc) {
-
-      if (tc <= 300) {
-
-        if (tc === 200) {
-          $('.progress-bar').addClass('progress-bar-warning');
-        } else if (tc === 270) {
-          $('.progress-bar').addClass('progress-bar-danger');
-        }
-
-        timerId = setTimeout(function() {
-
-                $('.progress-bar').css('width', 100 - tc * 100 / 300 + '%');
-                countOn(tc + 1);
-
-              }, 100);
-
-      } else {
-
-        clearTimeout(timerId);
-
-      }
-    }
-
-    $('#roomSelector').change(function() {
-
-      socket.emit('emit_room', $(this).val());
-      if (player.id === 0) {
-        countOn(timeCount);
-      }
-
+    $('#enter').click(function() {
+      socket.emit('emit_room', $('#roomSelector').val());
     });
 
-    $('#sideSelector').change(function() {
+    socket.on('emit_id', function(data) {
 
-      var newid = (player.id + 1) % 2;
-      player = new Player(newid);
+        if (!initialized) {
 
-    });
+          player = new Player(data);
+          game.player = player;
+          initialized = true;
 
-    for (var i = 0; i < board.size; i++) {
-
-      $('#panel').append('<tr id=row' + i +'></tr>');
-
-        for (var j = 0; j < board.size; j++) {
-
-          $('#row' + i).append('<td id=column' + j +'>  </td>');
         }
-      }
+      });
+
 
       //Game Procedures
 
@@ -119,9 +86,9 @@
 
           } else {
             //My Move
-            var row1 = parseInt($(this).parent().attr('id').charAt(3));
-            var column1 = parseInt($(this).attr('id').charAt(6));
-            var myMove = new Move(row1, column1, player);
+            var row1 = parseInt($(this).parent().attr('id').charAt(3)),
+                column1 = parseInt($(this).attr('id').charAt(6));
+            var myMove = new Move(row1, column1, player, false);
             board.update(myMove);
             board.display(myMove);
 
@@ -129,6 +96,16 @@
               room: $('#roomSelector').val(),
               enemyMove: myMove
             });
+
+            game.timeCount = 0;
+            clearTimeout(game.timerId);
+            $('.progress-bar').css('width', '100%');
+            if (!board.gameOn(myMove)) {
+                alert('You win!');
+                location.href = "";
+            }
+
+            player.myTurn = false;
 
             setTimeout(function() {
 
@@ -148,7 +125,7 @@
 
               var row = grow * 3 + srow,
                   column = gcolumn * 3 + scolumn;
-              var rmove = new Move(row, column, player);
+              var rmove = new Move(row, column, player, true);
               board.update(rmove);
               board.display(rmove);
 
@@ -157,20 +134,13 @@
                 enemyMove: rmove
               });
 
+              if (!board.gameOn(myMove)) {
+                alert('You win!');
+                location.href = "";
+              }
 
             }, 500);
 
-            timeCount = 0;
-            clearTimeout(timerId);
-            $('.progress-bar').css('width', '100%');
-            if (!board.gameOn(myMove)) {
-                alert('You win!');
-                location.href = "";
-            }
-
-            player.myTurn = false;
-            // player.side = (player.side === "◯")?  "×" : "◯";
-            // player.sidecolor = (player.sidecolor === "red")? "blue" : "red";
 
           }
 
@@ -183,16 +153,17 @@
 
       });
 
-            socket.on('emit_from_enemy', function(data) {
-              board.update(data.enemyMove);
-              board.display(data.enemyMove);
-              if (!board.gameOn(data.enemyMove)) {
-                alert('You lose!');
-                location.href = "";
-              }
-              player.myTurn = true;
+      socket.on('emit_from_enemy', function(data) {
+        board.update(data.enemyMove);
+        board.display(data.enemyMove);
+        if (!board.gameOn(data.enemyMove)) {
+          alert('You lose!');
+          location.href = "";
+        }
 
-            });
+        if (data.enemyMove.random) player.myTurn = true;
+
+      });
 
 
     });

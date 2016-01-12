@@ -1,4 +1,47 @@
-Hero = function(heroname){
+Game = function(player, board) {
+
+  this.player = player;
+  this.board = board;
+  this.timerId;
+  this.timeCount = 0;
+
+  this.initialize = function() {
+
+    for (var i = 0; i < this.board.size; i++) {
+      $('#panel').append('<tr id=row' + i +'></tr>');
+      for (var j = 0; j < this.board.size; j++) {
+          $('#row' + i).append('<td id=column' + j +'>  </td>');
+      }
+    }
+  }
+
+  this.countOn = function() {
+
+    var tc = this.timeCount;
+
+    if (tc <= 300) {
+
+      if (tc === 200) {
+          $('.progress-bar').addClass('progress-bar-warning');
+      } else if (tc === 270) {
+          $('.progress-bar').addClass('progress-bar-danger');
+      }
+      var game = this;
+      this.timerId = setTimeout(function() {
+
+        $('.progress-bar').css('width', 100 - tc * 100 / 300 + '%');
+        game.timeCount++;
+        game.countOn();
+
+      }, 100);
+
+    } else {
+        clearTimeout(this.timerId);
+    }
+  }
+}
+
+Hero = function(heroname) {
 
   var heroes = {
     warrior: 0,
@@ -178,13 +221,14 @@ SubBoard = function(size) {
   }
 }
 
- Move = function(row, column, player) {
+ Move = function(row, column, player, random) {
 
     this.globalRow = Math.floor(row / 3);
     this.globalColumn = Math.floor(column / 3);
     this.subRow = row % 3;
     this.subColumn = column % 3;
     this.player = player;
+    this.random = random;
 
 }
 
