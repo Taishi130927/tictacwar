@@ -8,10 +8,12 @@ Game = function(player, board) {
 
   this.initialize = function() {
 
+   $('#panel').append('<tbody></tbody>');
+
     for (var i = 0; i < this.board.size; i++) {
-      $('#panel').append('<tr id=row' + i +'></tr>');
+      $('tbody').append('<tr class=\"row' + i +' globalRow' + Math.floor(i / 3) + '\"></tr>');
       for (var j = 0; j < this.board.size; j++) {
-          $('#row' + i).append('<td id=column' + j +'>  </td>');
+          $('.row' + i).append('<td class=\"column' + j + ' globalColumn' + Math.floor(j / 3) + '\"></td>');
       }
     }
   }
@@ -62,6 +64,7 @@ Game = function(player, board) {
       }
 
       this.player.myTurn = false;
+      $('#indication').text('Enemy turn!');
 
     } else {
 
@@ -72,7 +75,12 @@ Game = function(player, board) {
 
       }
 
-       if (move.random) this.player.myTurn = true;
+       if (move.random) {
+
+        this.player.myTurn = true;
+        $('#indication').text('Your turn!');
+
+       }
 
     }
   }
@@ -168,7 +176,13 @@ Board = function(size) {
     var player = move.player;
     var row = 3 * move.globalRow + move.subRow,
         column = 3 * move.globalColumn + move.subColumn;
-    $('#row' + row + ' #column' + column).addClass('chosen').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
+
+    if (this.globalGrid[move.globalRow][move.globalColumn] !== null) {
+      $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).addClass('occupied').attr('data-side', player.side);
+    }
+
+    if (!move.random) $('td').removeClass('new');
+    $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
 
   }
 
