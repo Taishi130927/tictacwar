@@ -16,9 +16,10 @@ Game = function(player, board) {
 
       for (var j = 0; j < this.board.size; j++) {
 
-        $('.row' + i).append('<td class=\"column' + j + ' globalColumn' + Math.floor(j / 3) + '\"></td>');
-        if (i % 3 === 0) {
-          switch (j % 3) {
+        $('.row' + i).append('<td class=\"column' + j + ' globalColumn' + Math.floor(j / this.board.subSize) + '\"></td>');
+        if (i % this.board.subSize === 0) {
+
+          switch (j % this.board.subSize) {
 
             case 0:
               $('.row' + i  + ' .column' + j).attr('data-position','topleft');
@@ -35,8 +36,9 @@ Game = function(player, board) {
           }
         }
 
-        if (i % 3 === 2) {
-          switch (j % 3) {
+        if (i % this.board.subSize === 2) {
+
+          switch (j % this.board.subSize) {
 
             case 0:
               $('.row' + i  + ' .column' + j).attr('data-position','bottomleft');
@@ -53,30 +55,32 @@ Game = function(player, board) {
           }
         }
 
-        if (i % 3 === 1 && j % 3 === 0) $('.row' + i  + ' .column' + j).attr('data-position','left');
-        if (i % 3 === 1 && j % 3 === 2) $('.row' + i  + ' .column' + j).attr('data-position','right');
+        if (i % this.board.subSize === 1 && j % this.board.subSize === 0) $('.row' + i  + ' .column' + j).attr('data-position','left');
+        if (i % this.board.subSize === 1 && j % this.board.subSize === 2) $('.row' + i  + ' .column' + j).attr('data-position','right');
 
       }
     }
   }
 
-  this.countOn = function() {
+  this.countOn = function(timeLimit) {
 
-    var tc = this.timeCount;
+    var tc = this.timeCount,
+        tl = timeLimit * 10;
 
-    if (tc <= 300) {
+    if (tc <= tl) {
 
-      if (tc === 200) {
+      if (tc === Math.floor(tl * 2 / 3)) {
           $('.progress-bar').addClass('progress-bar-warning');
-      } else if (tc === 270) {
+      } else if (tc === Math.floor(tl * 9 / 10)) {
           $('.progress-bar').addClass('progress-bar-danger');
       }
+
       var game = this;
       this.timerId = setTimeout(function() {
 
-        $('.progress-bar').css('width', 100 - tc * 100 / 300 + '%');
+        $('.progress-bar').css('width', 100 - tc * 100 / tl + '%');
         game.timeCount++;
-        game.countOn();
+        game.countOn(timeLimit);
 
       }, 100);
 
@@ -123,7 +127,6 @@ Game = function(player, board) {
         $('#indication2').text('Your turn!');
 
        }
-
     }
   }
 

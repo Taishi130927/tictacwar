@@ -70,7 +70,10 @@
           $('#indication1').text('Your side is: ' + player.side);
 
           if (player.myTurn) {
+
             $('#indication2').text('Your turn!');
+            game.countOn(60);
+
           } else {
             $('#indication2').text('Enemy turn!');
           }
@@ -114,7 +117,10 @@
       });
 
       game.socket.on('emit_from_enemy', function(data) {
+
         game.processMove(data.enemyMove);
+        if (data.enemyMove.random) game.countOn(60);
+
       });
 
 
