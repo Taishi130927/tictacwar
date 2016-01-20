@@ -11,9 +11,51 @@ Game = function(player, board) {
    $('#panel').append('<tbody></tbody>');
 
     for (var i = 0; i < this.board.size; i++) {
+
       $('tbody').append('<tr class=\"row' + i +' globalRow' + Math.floor(i / 3) + '\"></tr>');
+
       for (var j = 0; j < this.board.size; j++) {
-          $('.row' + i).append('<td class=\"column' + j + ' globalColumn' + Math.floor(j / 3) + '\"></td>');
+
+        $('.row' + i).append('<td class=\"column' + j + ' globalColumn' + Math.floor(j / 3) + '\"></td>');
+        if (i % 3 === 0) {
+          switch (j % 3) {
+
+            case 0:
+              $('.row' + i  + ' .column' + j).attr('data-position','topleft');
+              break;
+
+            case 2:
+              $('.row' + i  + ' .column' + j).attr('data-position','topright');
+              break
+
+            default:
+              $('.row' + i  + ' .column' + j).attr('data-position','top');
+              break;
+
+          }
+        }
+
+        if (i % 3 === 2) {
+          switch (j % 3) {
+
+            case 0:
+              $('.row' + i  + ' .column' + j).attr('data-position','bottomleft');
+              break;
+
+            case 2:
+              $('.row' + i  + ' .column' + j).attr('data-position','bottomright');
+              break
+
+            default:
+              $('.row' + i  + ' .column' + j).attr('data-position','bottom');
+              break;
+
+          }
+        }
+
+        if (i % 3 === 1 && j % 3 === 0) $('.row' + i  + ' .column' + j).attr('data-position','left');
+        if (i % 3 === 1 && j % 3 === 2) $('.row' + i  + ' .column' + j).attr('data-position','right');
+
       }
     }
   }
@@ -64,7 +106,7 @@ Game = function(player, board) {
       }
 
       this.player.myTurn = false;
-      $('#indication').text('Enemy turn!');
+      $('#indication2').text('Enemy turn!');
 
     } else {
 
@@ -78,7 +120,7 @@ Game = function(player, board) {
        if (move.random) {
 
         this.player.myTurn = true;
-        $('#indication').text('Your turn!');
+        $('#indication2').text('Your turn!');
 
        }
 
@@ -169,6 +211,8 @@ Board = function(size) {
     this.subGrid[move.globalRow][move.globalColumn].update(move);
     this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
 
+    // console.log(this.globalGrid);
+
   }
 
   this.display = function(move) {
@@ -177,8 +221,11 @@ Board = function(size) {
     var row = 3 * move.globalRow + move.subRow,
         column = 3 * move.globalColumn + move.subColumn;
 
-    if (this.globalGrid[move.globalRow][move.globalColumn] !== null) {
-      $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).addClass('occupied').attr('data-side', player.side);
+    var occupant = this.globalGrid[move.globalRow][move.globalColumn];
+
+    if (occupant !== null) {
+
+      $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
     }
 
     if (!move.random) $('td').removeClass('new');
@@ -253,42 +300,42 @@ SubBoard = function(size) {
           column = move.subColumn,
           side = move.player.id;
 
-      var horiz = true,
-          vert = true,
-          diag1 = (row === column),
-          diag2 = (row === this.size - 1 - column);
+      var horizInvalid = false,
+          vertInvalid = false,
+          diagInvalid1 = !(row === column),
+          diagInvalid2 = !(row === this.size - 1 - column);
 
       for (var i = 0; i < this.size; i++){
 
         if (this.grid[row][i] !== side){
-          horiz = false;
+          horizInvalid = true;
         }
 
         if (this.grid[i][column] !== side){
-          vert = false;
+          vertInvalid = true;
         }
       }
 
-      if (diag1 || diag2){
+      if (!diagInvalid1 || !diagInvalid2){
 
         for (var i = 0; i < this.size; i++){
 
           if (this.grid[i][i] !== side){
-            diag1 = false;
+            diagInvalid1 = true;
           }
 
           if (this.grid[i][this.size - 1 -i] !== side){
-            diag2 = false;
+            diagInvalid2 = true;
           }
         }
       }
     }
 
-    if (horiz || vert || diag1 || diag2) {
+    if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
       this.occupant = move.player.id
       return move.player.id;
     } else {
-      return null;
+      return this.occupant;
     }
 
   }

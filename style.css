@@ -10,7 +10,7 @@ body {
   font-family: arial, sans-serif;
 }
 
-#indication {
+#indication2 {
   margin: 0 auto 10px;
 }
 
@@ -91,11 +91,11 @@ body {
   width: 70%;
   height: 70%;
   margin: 5% auto;
-  border-collapse: collapse;
+  border-collapse: separate;
 }
 
 td {
-  border: solid 2px #999;
+  border: solid 1px #999;
   width: 11%;
   height: 11%;
   cursor: pointer;
@@ -110,20 +110,112 @@ tr:nth-of-type(even) td:nth-of-type(even) {
   background-color: #c9c9c9;
 }
 
-tr:nth-of-type(3n) {
-  border-bottom: solid 4px #999;
+td[data-position="bottom"] {
+  border-bottom: solid 2px #999;
 }
 
-td:nth-of-type(3n) {
-  border-right: solid 4px #999;
+td[data-position="bottomright"] {
+  border-bottom: solid 2px #999;
+  border-right: solid 2px #999;
 }
 
-tr:nth-of-type(1) {
-  border-top: solid 4px #999;
+td[data-position="bottomleft"] {
+  border-bottom: solid 2px #999;
+  border-left: solid 2px #999;
 }
 
-td:nth-of-type(1) {
-  border-left: solid 4px #999;
+td[data-position="top"] {
+  border-top: solid 2px #999;
+}
+
+td[data-position="topleft"] {
+  border-top: solid 2px #999;
+  border-left: solid 2px #999;
+}
+
+td[data-position="topright"] {
+  border-top: solid 2px #999;
+  border-right: solid 2px #999;
+}
+
+td[data-position="right"] {
+  border-right: solid 2px #999;
+}
+
+td[data-position="left"] {
+  border-left: solid 2px #999;
+}
+
+td[data-position="bottom"][data-occupant="0"] {
+  border-bottom: solid 2px red;
+}
+
+td[data-position="bottomright"][data-occupant="0"] {
+  border-bottom: solid 2px red;
+  border-right: solid 2px red;
+}
+
+td[data-position="bottomleft"][data-occupant="0"] {
+  border-bottom: solid 2px red;
+  border-left: solid 2px red;
+}
+
+td[data-position="top"][data-occupant="0"] {
+  border-top: solid 2px red;
+}
+
+td[data-position="topleft"][data-occupant="0"] {
+  border-top: solid 2px red;
+  border-left: solid 2px red;
+}
+
+td[data-position="topright"][data-occupant="0"] {
+  border-top: solid 2px red;
+  border-right: solid 2px red;
+}
+
+td[data-position="right"][data-occupant="0"] {
+  border-right: solid 2px red;
+}
+
+td[data-position="left"][data-occupant="0"] {
+  border-left: solid 2px red;
+}
+
+td[data-position="bottom"][data-occupant="1"] {
+  border-bottom: solid 2px blue;
+}
+
+td[data-position="bottomright"][data-occupant="1"] {
+  border-bottom: solid 2px blue;
+  border-right: solid 2px blue;
+}
+
+td[data-position="bottomleft"][data-occupant="1"] {
+  border-bottom: solid 2px blue;
+  border-left: solid 2px blue;
+}
+
+td[data-position="top"][data-occupant="1"] {
+  border-top: solid 2px blue;
+}
+
+td[data-position="topleft"][data-occupant="1"] {
+  border-top: solid 2px blue;
+  border-left: solid 2px blue;
+}
+
+td[data-position="topright"][data-occupant="1"] {
+  border-top: solid 2px blue;
+  border-right: solid 2px blue;
+}
+
+td[data-position="right"][data-occupant="1"] {
+  border-right: solid 2px blue;
+}
+
+td[data-position="left"][data-occupant="1"] {
+  border-left: solid 2px blue;
 }
 
 td:hover {
