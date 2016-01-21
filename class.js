@@ -85,7 +85,10 @@ Game = function(player, board) {
       }, 100);
 
     } else {
-        clearTimeout(this.timerId);
+
+        alert("Time up!");
+        this.switchTurn();
+
     }
   }
 
@@ -109,8 +112,7 @@ Game = function(player, board) {
         location.href = "";
       }
 
-      this.player.myTurn = false;
-      $('#indication2').text('Enemy turn!');
+      this.switchTurn();
 
     } else {
 
@@ -123,10 +125,35 @@ Game = function(player, board) {
 
        if (move.random) {
 
-        this.player.myTurn = true;
-        $('#indication2').text('Your turn!');
+        this.switchTurn();
 
        }
+    }
+  }
+
+  this.switchTurn = function() {
+
+    if (this.player.myTurn) {
+
+      this.player.myTurn = false;
+      $('#indication2').text('Enemy turn!');
+      this.timeCount = 0;
+      clearTimeout(this.timerId);
+      $('.progress-bar').removeClass('progress-bar-warning progress-bar-danger');
+      $('.progress-bar').css('width', '100%');
+
+      this.socket.json.emit('emit_from_client', {
+
+        room: $('#roomSelector').val(),
+        enemyMove: null
+
+      });
+
+    } else {
+
+      this.player.myTurn = true;
+      $('#indication2').text('Your turn!');
+      this.countOn(60);
     }
   }
 

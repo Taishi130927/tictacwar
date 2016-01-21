@@ -95,10 +95,7 @@
                 column1 = parseInt($(this).attr('class').charAt(6));
             var myMove = new Move(row1, column1, player, false);
             game.processMove(myMove);
-
-            game.timeCount = 0;
-            clearTimeout(game.timerId);
-            $('.progress-bar').css('width', '100%');
+            game.switchTurn();
 
             setTimeout(function() {
 
@@ -117,10 +114,11 @@
       });
 
       game.socket.on('emit_from_enemy', function(data) {
-
-        game.processMove(data.enemyMove);
-        if (data.enemyMove.random) game.countOn(60);
-
+        if (data.enemyMove !== null) {
+          game.processMove(data.enemyMove);
+        } else {
+          game.switchTurn();
+        }
       });
 
 
