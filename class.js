@@ -87,7 +87,7 @@ Game = function(player, board) {
     } else {
 
         alert("Time up!");
-        this.switchTurn();
+        this.switchTurn(true);
 
     }
   }
@@ -112,7 +112,9 @@ Game = function(player, board) {
         location.href = "";
       }
 
-      this.switchTurn();
+      if (!move.random) {
+        this.switchTurn(false);
+      }
 
     } else {
 
@@ -125,13 +127,13 @@ Game = function(player, board) {
 
        if (move.random) {
 
-        this.switchTurn();
+        this.switchTurn(false);
 
        }
     }
   }
 
-  this.switchTurn = function() {
+  this.switchTurn = function(forced) {
 
     if (this.player.myTurn) {
 
@@ -142,12 +144,15 @@ Game = function(player, board) {
       $('.progress-bar').removeClass('progress-bar-warning progress-bar-danger');
       $('.progress-bar').css('width', '100%');
 
-      this.socket.json.emit('emit_from_client', {
+      if (forced) {
 
-        room: $('#roomSelector').val(),
-        enemyMove: null
+          this.socket.json.emit('emit_from_client', {
 
-      });
+          room: $('#roomSelector').val(),
+          enemyMove: null
+
+        });
+      }
 
     } else {
 

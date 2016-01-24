@@ -97,7 +97,7 @@
                 column1 = parseInt($(this).attr('class').charAt(6));
             var myMove = new Move(row1, column1, player, false);
             game.processMove(myMove);
-            game.switchTurn();
+            // game.switchTurn();
 
             setTimeout(function() {
 
@@ -119,7 +119,7 @@
         if (data.enemyMove !== null) {
           game.processMove(data.enemyMove);
         } else {
-          game.switchTurn();
+          game.switchTurn(false);
         }
       });
 

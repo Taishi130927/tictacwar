@@ -39,7 +39,7 @@ function handler(req, res) {
       break;
 
     case '/style.css':
-      requestProcessor(res, 'style.css', 'css');
+      requestProcessor(res, 'css/style.css', 'css');
       break;
 
     default :
