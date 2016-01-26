@@ -36,11 +36,15 @@
   </div>
 
   <div id="wrapper">
-    <i class="fa fa-flag fa-2x icon1"></i>
-    <div class="energy1"></div>
-    <table id="panel"></table>
-    <div class="energy2"></div>
     <i class="fa fa-flag fa-2x icon2"></i>
+    <div class="energy2">
+      <div class="energy-bar2"></div>
+    </div>
+    <table id="panel"></table>
+    <div class="energy1">
+      <div class="energy-bar1"></div>
+    </div>
+    <i class="fa fa-flag fa-2x icon1"></i>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -53,8 +57,9 @@
     var board = new Board(9);
     var initialized = false;
 
-    var player = new Player(0);
-    var game = new Game(player, board);
+    var player = new Player(0),
+        enemy = new Player(1);
+    var game = new Game(player, enemy, board);
     // Game Initialization
     game.initialize();
 
@@ -67,14 +72,16 @@
         if (!initialized) {
 
           player = new Player(data);
+          enemy = new Player((data + 1) % 2);
           game.player = player;
+          game.enemy = enemy;
           initialized = true;
           $('#indication1').text('Your side is: ' + player.side);
 
           if (player.myTurn) {
 
             $('#indication2').text('Your turn!');
-            game.countOn(60);
+            game.countOn();
 
           } else {
             $('#indication2').text('Enemy turn!');

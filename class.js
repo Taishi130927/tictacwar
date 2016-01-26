@@ -1,10 +1,12 @@
-Game = function(player, board) {
+Game = function(player, enemy, board) {
 
   this.player = player;
+  this.enemy = enemy; // for enrgy storage only
   this.board = board;
   this.socket = io.connect();
   this.timerId;
   this.timeCount = 0;
+  this.timeLimit = 60;
 
   this.initialize = function() {
 
@@ -62,10 +64,10 @@ Game = function(player, board) {
     }
   }
 
-  this.countOn = function(timeLimit) {
+  this.countOn = function() {
 
     var tc = this.timeCount,
-        tl = timeLimit * 10;
+        tl = this.timeLimit * 10;
 
     if (tc <= tl) {
 
@@ -80,7 +82,7 @@ Game = function(player, board) {
 
         $('.progress-bar').css('width', 100 - tc * 100 / tl + '%');
         game.timeCount++;
-        game.countOn(timeLimit);
+        game.countOn();
 
       }, 100);
 
@@ -113,6 +115,8 @@ Game = function(player, board) {
       }
 
       if (!move.random) {
+
+        this.updateEnergy();
         this.switchTurn(false);
       }
 
@@ -127,10 +131,19 @@ Game = function(player, board) {
 
        if (move.random) {
 
+        //this.updateEnergy();
         this.switchTurn(false);
 
        }
     }
+  }
+
+  this.updateEnergy = function() {
+
+    this.player.energy += 50 * (this.timeLimit - this.timeCount) / this.timeLimit;
+    $('.energy-bar1').css('top', 100 - this.player.energy + '%');
+    $('.energy-bar1').css('height', this.player.energy + '%');
+
   }
 
   this.switchTurn = function(forced) {
@@ -215,6 +228,7 @@ Player = function(id) {
   this.side = properties[id][0];
   this.sidecolor = properties[id][1];
   this.myTurn = properties[id][2];
+  this.energy = 50;
 
 }
 
