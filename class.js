@@ -1,7 +1,7 @@
 Game = function(player, enemy, board) {
 
   this.player = player;
-  this.enemy = enemy; // for enrgy storage only
+  this.enemy = enemy; // for energy storage only
   this.board = board;
   this.socket = io.connect();
   this.timerId;
@@ -101,6 +101,13 @@ Game = function(player, enemy, board) {
 
     if (move.player === this.player) {
 
+      if (!move.random) {
+
+        this.updateEnergy(true);
+        move.player = this.player;
+
+      }
+
       this.socket.json.emit('emit_from_client', {
 
         room: $('#roomSelector').val(),
@@ -115,12 +122,13 @@ Game = function(player, enemy, board) {
       }
 
       if (!move.random) {
-
-        this.updateEnergy();
         this.switchTurn(false);
       }
 
     } else {
+
+      this.enemy = move.player;
+      this.updateEnergy(false);
 
       if (!this.board.gameOn(move)) {
 
@@ -138,12 +146,34 @@ Game = function(player, enemy, board) {
     }
   }
 
-  this.updateEnergy = function() {
+  this.updateEnergy = function(isPlayer) {
 
-    this.player.energy += 50 * (this.timeLimit - this.timeCount) / this.timeLimit;
-    $('.energy-bar1').css('top', 100 - this.player.energy + '%');
-    $('.energy-bar1').css('height', this.player.energy + '%');
+    tc = this.timeCount / 10;
 
+    if (isPlayer) {
+
+      this.player.energy = Math.min(this.player.energy + 50 * (this.timeLimit - tc) / this.timeLimit, 100);
+      $('.energy-bar1').css('top', 100 - this.player.energy + '%');
+      $('.energy-bar1').css('height', this.player.energy + '%');
+
+      if (this.player.energy === 100) {
+        $('.energy-bar1').addClass('energy-bar-full');
+      } else {
+         $('.energy-bar1').removeClass('energy-bar-full');
+      }
+
+    } else {
+
+      $('.energy-bar2').css('top', 100 - this.enemy.energy + '%');
+      $('.energy-bar2').css('height', this.enemy.energy + '%');
+
+      if (this.enemy.energy === 100) {
+        $('.energy-bar2').addClass('energy-bar-full');
+      } else {
+         $('.energy-bar2').removeClass('energy-bar-full');
+      }
+
+    }
   }
 
   this.switchTurn = function(forced) {
