@@ -3,18 +3,14 @@ $border-width: 2px;
 @mixin barSetting($vertical, $gradientStart, $gradientEnd, $filterStart, $filterEnd) {
   @if $vertical == true {
     border-radius: 5px;
-    background-image: -webkit-linear-gradient(top, $gradientStart 0%, $gradientEnd 100%);
-    background-image:      -o-linear-gradient(top, $gradientStart 0%, $gradientEnd 100%);
-    background-image: -webkit-gradient(linear, left top, left bottom, from($gradientStart), to($gradientEnd));
-    background-image:         linear-gradient(to bottom, $gradientStart 0%, $gradientEnd 100%);
+    background-image: -o-linear-gradient(top, $gradientStart 0%, $gradientEnd 100%);
+    background-image: linear-gradient(to bottom, $gradientStart 0%, $gradientEnd 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$filterStart}', endColorstr='#{$filterEnd}', GradientType=0);
     background-repeat: repeat-x;
   } @else {
     border-radius: 5px;
-    background-image: -webkit-linear-gradient(left, $gradientStart 0%, $gradientEnd 100%);
-    background-image:      -o-linear-gradient(lrft, $gradientStart 0%, $gradientEnd 100%);
-    background-image: -webkit-gradient(linear, left top, left bottom, from($gradientStart), to($gradientEnd));
-    background-image:         linear-gradient(to right, $gradientStart 0%, $gradientEnd 100%);
+    background-image: -o-linear-gradient(lrft, $gradientStart 0%, $gradientEnd 100%);
+    background-image: linear-gradient(to right, $gradientStart 0%, $gradientEnd 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$filterStart}', endColorstr='#{$filterEnd}', GradientType=0);
     background-repeat: repeat-x;
   }
@@ -114,6 +110,9 @@ body {
   width: 100%;
   height: 50%;
   @include barSetting(false, #ffd700, #ffdead, "#fff0ad4e", "#ffec971f");
+  -webkit-transition: top 1s, height 1s;
+  -o-transition: top 1s, height 1s;
+  transition: top 1s, height 1s;
 }
 
 .energy2 {
@@ -131,6 +130,9 @@ body {
   width: 100%;
   height: 50%;
   @include barSetting(false, #ffd700, #ffdead, "#fff0ad4e", "#ffec971f");
+  -webkit-transition: height 1s;
+  -o-transition: height 1s;
+  transition: height 1s;
 }
 
 .energy-bar-full {
@@ -217,7 +219,7 @@ tr:nth-of-type(even) td:nth-of-type(even) {
 }
 
 .occupied[data-side="◯"] {
-  background-color: #FF97C2  !important;
+  background-color: #ff97c2  !important;
   opacity: 0.2;
 }
 
