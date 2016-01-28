@@ -1,16 +1,18 @@
 class Game {
 
- public player: Player;
- public enemy: Playerboard: Board, timeCount: number;
- constructor(public player: Player, enemy: Player, board: Board) {
+  player: Player;
+  enemy: Player;
+  board: Board;
 
-  // this.player = player;
-  // this.enemy = enemy; // for energy storage only
-  // this.board = board;
-  this.socket = io.connect();
-  this.timerId;
-  this.timeCount: number = 0;
-  this.timeLimit = 60;
+  constructor(player: Player, enemy: Player, board: Board) {
+
+    this.player = player;
+    this.enemy = enemy; // for energy storage only
+    this.board = board;
+    this.socket = io.connect();
+    this.timerId;
+    this.timeCount = 0;
+    this.timeLimit = 60;
 
   }
 
@@ -236,62 +238,71 @@ class Game {
 
 class Hero {
 
-  var heroes = {
-    warrior: 0,
-    mage: 1,
-    hunter: 2,
-    rogue: 3,
-    warlock: 4,
-    priest: 5,
-    pirate: 6,
-    paladin: 7,
-    ninja: 8
-  };
+  constructor(heroname: string) {
 
-  this.hname = heroname;
-  this.hid = heroes[heroname];
+  enum Heroes {
+    warrior = 0,
+    mage = 1,
+    hunter = 2,
+    rogue = 3,
+    warlock =  4,
+    priest = 5,
+    pirate = 6,
+    paladin = 7,
+    ninja = 8
+  }
 
+    this.hname = heroname;
+    this.hid = Heroes[heroname];
+  }
 }
 
 class Player {
 
-  var properties = [
-      ["◯", "red", true],
-      ["×", "blue", false]
-    ];
+  constructor(id: number) {
 
-  this.id = id;
-  this.side = properties[id][0];
-  this.sidecolor = properties[id][1];
-  this.myTurn = properties[id][2];
-  this.energy = 50;
+    var properties = [
+        ["◯", "red", true],
+        ["×", "blue", false]
+      ];
 
+    this.id = id;
+    this.side = properties[id][0];
+    this.sidecolor = properties[id][1];
+    this.myTurn = properties[id][2];
+    this.energy = 50;
+
+  }
 }
 
 
 class Board {
 
-  this.size = size;
-  var subSize = Math.sqrt(size);
-  this.subSize = subSize;
-  var subGrid = new Array(subSize),
-      globalGrid = new Array(subSize);
+  constructor(size: number) {
 
-  for (var i = 0; i < subSize; i++){
+    this.size = size;
+    var subSize: number = Math.sqrt(size);
+    this.subSize = subSize;
+    var subGrid: SubBoard[] = new Array(subSize),
+        globalGrid: number[][] = new Array(subSize);
 
-    subGrid[i] = new Array(subSize);
-    globalGrid[i] = new Array(subSize);
+    for (var i = 0; i < subSize; i++){
 
-    for (var j = 0; j < size; j++){
-      subGrid[i][j] = new SubBoard(subSize);
+      subGrid[i] = new Array(subSize);
+      globalGrid[i] = new Array(subSize);
+
+      for (var j = 0; j < size; j++){
+        subGrid[i][j] = new SubBoard(subSize);
+      }
+
     }
+
+    this.subGrid = subGrid;
+    this.globalGrid = globalGrid;
 
   }
 
-  this.subGrid = subGrid;
-  this.globalGrid = globalGrid;
-
-  this.update = function (move) {
+  public update(move: Move): void {
 
     this.subGrid[move.globalRow][move.globalColumn].update(move);
     this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
@@ -300,7 +311,7 @@ class Board {
 
   }
 
-  this.display = function(move) {
+  public display(move: Move): void {
 
     var player = move.player;
     var row = 3 * move.globalRow + move.subRow,
@@ -308,7 +319,7 @@ class Board {
 
     var occupant = this.globalGrid[move.globalRow][move.globalColumn];
 
-    if (occupant !== null) {
+    if (occupant !== -1) {
 
       $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
     }
@@ -318,7 +329,7 @@ class Board {
 
   }
 
-  this.gameOn = function(move) {
+  public gameOn(move: Move): boolean {
 
     var row = move.globalRow,
         column = move.globalColumn,
@@ -361,21 +372,25 @@ class Board {
 
 class SubBoard {
 
-  this.size = size;
-  this.occupant = null;
-  var grid = new Array(size);
+  constructor(size: number) {
 
-  for (var i = 0; i < size; i++){
-    grid[i] = new Array(size);
+    this.size = size;
+    this.occupant = -1;
+    var grid: number[][] = new Array(size);
+
+    for (var i = 0; i < size; i++){
+      grid[i] = new Array(size);
+    }
+
+    this.grid = grid;
+
   }
 
-  this.grid = grid;
-
-  this.update = function (move) {
+  public update(move: Move): void {
     this.grid[move.subRow][move.subColumn] = move.player.id;
   }
 
-  this.occupationUpdate = function(move) {
+  public occupationUpdate(move: Move): number {
 
     if (move.player.id === this.occupant) {
       return this.occupant;
@@ -428,11 +443,20 @@ class SubBoard {
 
  class Move {
 
+   globalRow: number;
+   globalColumn: number;
+   subRow: number;
+   subColumn: number;
+
+   constructor(row: number, column: number, player: Player, random: boolean) {
+
     this.globalRow = Math.floor(row / 3);
     this.globalColumn = Math.floor(column / 3);
     this.subRow = row % 3;
     this.subColumn = column % 3;
     this.player = player;
     this.random = random;
+
+  }
 
 }

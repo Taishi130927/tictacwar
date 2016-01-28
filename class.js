@@ -1,13 +1,11 @@
 var Game = (function () {
     function Game(player, enemy, board) {
         this.player = player;
-        // this.player = player;
-        // this.enemy = enemy; // for energy storage only
-        // this.board = board;
+        this.enemy = enemy; // for energy storage only
+        this.board = board;
         this.socket = io.connect();
         this.timerId;
-        this.timeCount;
-        number = 0;
+        this.timeCount = 0;
         this.timeLimit = 60;
     }
     Game.prototype.initialize = function () {
@@ -166,151 +164,152 @@ var Game = (function () {
     return Game;
 })();
 var Hero = (function () {
-    function Hero() {
+    function Hero(heroname) {
+        var Heroes;
+        (function (Heroes) {
+            Heroes[Heroes["warrior"] = 0] = "warrior";
+            Heroes[Heroes["mage"] = 1] = "mage";
+            Heroes[Heroes["hunter"] = 2] = "hunter";
+            Heroes[Heroes["rogue"] = 3] = "rogue";
+            Heroes[Heroes["warlock"] = 4] = "warlock";
+            Heroes[Heroes["priest"] = 5] = "priest";
+            Heroes[Heroes["pirate"] = 6] = "pirate";
+            Heroes[Heroes["paladin"] = 7] = "paladin";
+            Heroes[Heroes["ninja"] = 8] = "ninja";
+        })(Heroes || (Heroes = {}));
+        this.hname = heroname;
+        this.hid = Heroes[heroname];
     }
     return Hero;
 })();
-var heroes = {
-    warrior: 0,
-    mage: 1,
-    hunter: 2,
-    rogue: 3,
-    warlock: 4,
-    priest: 5,
-    pirate: 6,
-    paladin: 7,
-    ninja: 8
-};
-this.hname = heroname;
-this.hid = heroes[heroname];
 var Player = (function () {
-    function Player() {
+    function Player(id) {
+        var properties = [
+            ["◯", "red", true],
+            ["×", "blue", false]
+        ];
+        this.id = id;
+        this.side = properties[id][0];
+        this.sidecolor = properties[id][1];
+        this.myTurn = properties[id][2];
+        this.energy = 50;
     }
     return Player;
 })();
-var properties = [
-    ["◯", "red", true],
-    ["×", "blue", false]
-];
-this.id = id;
-this.side = properties[id][0];
-this.sidecolor = properties[id][1];
-this.myTurn = properties[id][2];
-this.energy = 50;
 var Board = (function () {
-    function Board() {
+    function Board(size) {
+        this.size = size;
+        var subSize = Math.sqrt(size);
+        this.subSize = subSize;
+        var subGrid = new Array(subSize), globalGrid = new Array(subSize);
+        for (var i = 0; i < subSize; i++) {
+            subGrid[i] = new Array(subSize);
+            globalGrid[i] = new Array(subSize);
+            for (var j = 0; j < size; j++) {
+                subGrid[i][j] = new SubBoard(subSize);
+            }
+        }
+        this.subGrid = subGrid;
+        this.globalGrid = globalGrid;
     }
+    Board.prototype.update = function (move) {
+        this.subGrid[move.globalRow][move.globalColumn].update(move);
+        this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
+        // console.log(this.globalGrid);
+    };
+    Board.prototype.display = function (move) {
+        var player = move.player;
+        var row = 3 * move.globalRow + move.subRow, column = 3 * move.globalColumn + move.subColumn;
+        var occupant = this.globalGrid[move.globalRow][move.globalColumn];
+        if (occupant !== -1) {
+            $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
+        }
+        if (!move.random)
+            $('td').removeClass('new');
+        $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
+    };
+    Board.prototype.gameOn = function (move) {
+        var row = move.globalRow, column = move.globalColumn, side = move.player.id;
+        var horiz = true, vert = true, diag1 = (row === column), diag2 = (row === this.size - 1 - column);
+        for (var i = 0; i < this.subSize; i++) {
+            if (this.globalGrid[row][i] !== side) {
+                horiz = false;
+            }
+            if (this.globalGrid[i][column] !== side) {
+                vert = false;
+            }
+        }
+        if (diag1 || diag2) {
+            for (var i = 0; i < this.subSize; i++) {
+                if (this.globalGrid[i][i] !== side) {
+                    diag1 = false;
+                }
+                if (this.globalGrid[i][this.subSize - 1 - i] !== side) {
+                    diag2 = false;
+                }
+            }
+        }
+        return !(horiz || vert || diag1 || diag2);
+    };
     return Board;
 })();
-this.size = size;
-var subSize = Math.sqrt(size);
-this.subSize = subSize;
-var subGrid = new Array(subSize), globalGrid = new Array(subSize);
-for (var i = 0; i < subSize; i++) {
-    subGrid[i] = new Array(subSize);
-    globalGrid[i] = new Array(subSize);
-    for (var j = 0; j < size; j++) {
-        subGrid[i][j] = new SubBoard(subSize);
-    }
-}
-this.subGrid = subGrid;
-this.globalGrid = globalGrid;
-this.update = function (move) {
-    this.subGrid[move.globalRow][move.globalColumn].update(move);
-    this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
-    // console.log(this.globalGrid);
-};
-this.display = function (move) {
-    var player = move.player;
-    var row = 3 * move.globalRow + move.subRow, column = 3 * move.globalColumn + move.subColumn;
-    var occupant = this.globalGrid[move.globalRow][move.globalColumn];
-    if (occupant !== null) {
-        $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
-    }
-    if (!move.random)
-        $('td').removeClass('new');
-    $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
-};
-this.gameOn = function (move) {
-    var row = move.globalRow, column = move.globalColumn, side = move.player.id;
-    var horiz = true, vert = true, diag1 = (row === column), diag2 = (row === this.size - 1 - column);
-    for (var i = 0; i < this.subSize; i++) {
-        if (this.globalGrid[row][i] !== side) {
-            horiz = false;
-        }
-        if (this.globalGrid[i][column] !== side) {
-            vert = false;
-        }
-    }
-    if (diag1 || diag2) {
-        for (var i = 0; i < this.subSize; i++) {
-            if (this.globalGrid[i][i] !== side) {
-                diag1 = false;
-            }
-            if (this.globalGrid[i][this.subSize - 1 - i] !== side) {
-                diag2 = false;
-            }
-        }
-    }
-    return !(horiz || vert || diag1 || diag2);
-};
 var SubBoard = (function () {
-    function SubBoard() {
+    function SubBoard(size) {
+        this.size = size;
+        this.occupant = -1;
+        var grid = new Array(size);
+        for (var i = 0; i < size; i++) {
+            grid[i] = new Array(size);
+        }
+        this.grid = grid;
     }
+    SubBoard.prototype.update = function (move) {
+        this.grid[move.subRow][move.subColumn] = move.player.id;
+    };
+    SubBoard.prototype.occupationUpdate = function (move) {
+        if (move.player.id === this.occupant) {
+            return this.occupant;
+        }
+        else {
+            var row = move.subRow, column = move.subColumn, side = move.player.id;
+            var horizInvalid = false, vertInvalid = false, diagInvalid1 = !(row === column), diagInvalid2 = !(row === this.size - 1 - column);
+            for (var i = 0; i < this.size; i++) {
+                if (this.grid[row][i] !== side) {
+                    horizInvalid = true;
+                }
+                if (this.grid[i][column] !== side) {
+                    vertInvalid = true;
+                }
+            }
+            if (!diagInvalid1 || !diagInvalid2) {
+                for (var i = 0; i < this.size; i++) {
+                    if (this.grid[i][i] !== side) {
+                        diagInvalid1 = true;
+                    }
+                    if (this.grid[i][this.size - 1 - i] !== side) {
+                        diagInvalid2 = true;
+                    }
+                }
+            }
+        }
+        if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
+            this.occupant = move.player.id;
+            return move.player.id;
+        }
+        else {
+            return this.occupant;
+        }
+    };
     return SubBoard;
 })();
-this.size = size;
-this.occupant = null;
-var grid = new Array(size);
-for (var i = 0; i < size; i++) {
-    grid[i] = new Array(size);
-}
-this.grid = grid;
-this.update = function (move) {
-    this.grid[move.subRow][move.subColumn] = move.player.id;
-};
-this.occupationUpdate = function (move) {
-    if (move.player.id === this.occupant) {
-        return this.occupant;
-    }
-    else {
-        var row = move.subRow, column = move.subColumn, side = move.player.id;
-        var horizInvalid = false, vertInvalid = false, diagInvalid1 = !(row === column), diagInvalid2 = !(row === this.size - 1 - column);
-        for (var i = 0; i < this.size; i++) {
-            if (this.grid[row][i] !== side) {
-                horizInvalid = true;
-            }
-            if (this.grid[i][column] !== side) {
-                vertInvalid = true;
-            }
-        }
-        if (!diagInvalid1 || !diagInvalid2) {
-            for (var i = 0; i < this.size; i++) {
-                if (this.grid[i][i] !== side) {
-                    diagInvalid1 = true;
-                }
-                if (this.grid[i][this.size - 1 - i] !== side) {
-                    diagInvalid2 = true;
-                }
-            }
-        }
-    }
-    if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
-        this.occupant = move.player.id;
-        return move.player.id;
-    }
-    else {
-        return this.occupant;
-    }
-};
 var Move = (function () {
-    function Move() {
+    function Move(row, column, player, random) {
+        this.globalRow = Math.floor(row / 3);
+        this.globalColumn = Math.floor(column / 3);
+        this.subRow = row % 3;
+        this.subColumn = column % 3;
+        this.player = player;
+        this.random = random;
     }
     return Move;
 })();
-this.globalRow = Math.floor(row / 3);
-this.globalColumn = Math.floor(column / 3);
-this.subRow = row % 3;
-this.subColumn = column % 3;
-this.player = player;
-this.random = random;
