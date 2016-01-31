@@ -180,19 +180,34 @@ var Hero = (function () {
             Heroes[Heroes["paladin"] = 7] = "paladin";
             Heroes[Heroes["ninja"] = 8] = "ninja";
         })(Heroes || (Heroes = {}));
+        var HeroURLs = {
+            warrior: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/rona.png",
+            mage: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/celeste.png",
+            hunter: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/ringo.png",
+            rogue: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/glaive.png",
+            warlock: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/krul.png",
+            priest: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/reim.png",
+            pirate: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/koshka.png",
+            paladin: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/blackfeather.png",
+            ninja: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/taka.png"
+        };
         this.hname = heroname;
         this.hid = Heroes[heroname];
+        this.hurl = HeroURLs[heroname];
     }
+    Hero.prototype.showImage = function () {
+    };
     return Hero;
 })();
 var Player = (function () {
-    function Player(id) {
+    function Player(id, hero) {
         var properties = [
             ["◯", "red"],
             ["×", "blue"]
         ];
         var turns = [true, false];
         this.id = id;
+        this.hero = hero;
         this.side = properties[id][0];
         this.sidecolor = properties[id][1];
         this.myTurn = turns[id];

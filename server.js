@@ -10,7 +10,7 @@ function requestProcessor(res, url, type) {
 
     }
 
-    res.writeHead(200, {'Content-Type': 'text/' + type});
+    res.writeHead(200, {'Content-Type': type});
     res.write(data);
     res.end();
 
@@ -20,26 +20,32 @@ function requestProcessor(res, url, type) {
 var app = require('http').createServer(handler),
     io = require('socket.io').listen(app)
     fs = require('fs');
+
 app.listen(1337);
 //io.set('log level', 1);
 function handler(req, res) {
 
-  switch (req.url) {
+  switch (true) {
 
-    case '/' :
-      requestProcessor(res, 'tictactoe.html', 'html');
+    case /\u002f$/.test(req.url) :
+      requestProcessor(res, 'tictactoe.html', 'text/html');
       break;
 
-    case '/class.js':
-      requestProcessor(res, 'class.js', 'javascript');
+    case /\/class.js/.test(req.url):
+      requestProcessor(res, 'class.js', 'text/javascript');
       break;
 
-    case '/function.js':
-      requestProcessor(res, 'function.js', 'javascript');
+    case /\/function.js/.test(req.url):
+      requestProcessor(res, 'function.js', 'text/javascript');
       break;
 
-    case '/style.css':
-      requestProcessor(res, 'css/style.css', 'css');
+    case /\/style.css/.test(req.url):
+      requestProcessor(res, 'css/style.css', 'text/css');
+      break;
+
+    case /\/img\/[a-z]*/.test(req.url):
+      requestProcessor(res, 'img/' + req.url.match(/[a-z.]*$/)[0], 'image/png');
+      //console.log('img/' + req.url.match(/[a-z.]*$/)[0]);
       break;
 
     default :
@@ -53,16 +59,41 @@ function handler(req, res) {
 
 console.log("server listening ...");
 
-var roomcount = [0, 0];
+var roomcount = [0, 0]; //room 1,2
+var heroes = ["", ""];
 io.sockets.on('connection', function(socket){
   socket.on('emit_room', function(data){
-
-    socket.join(data);
-    var rnum = data.slice(5, data.length) - 1;
+    socket.join(data.room);
+    var rnum = data.room.slice(5, data.room.length) - 1;
     roomcount[rnum] = (roomcount[rnum] + 1) % 2;
-    socket.emit('emit_id', roomcount[rnum]);
+    var id = roomcount[rnum];
+    socket.emit('emit_id', id);
 
+     if (heroes[0] === "" && heroes[1] === "") {
+      heroes[id] = data.hero;
+    } else {
+
+      heroes[id] = data.hero;
+      //console.log(heroes);
+      socket.json.emit('emit_hero', {
+
+        heroes: heroes,
+        id: id
+
+      });
+
+       socket.json.to(data.room).emit('emit_hero', {
+
+        heroes: heroes,
+        id: id
+
+      });
+
+       heroes = ["", ""];
+
+    }
   });
+
 
   socket.on('emit_from_client', function(data){
     socket.broadcast.to(data.room).emit('emit_from_enemy', data)

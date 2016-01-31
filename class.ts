@@ -248,6 +248,7 @@ class Hero {
 
   hname: string;
   hid: number;
+  hurl: string;
 
   constructor(heroname: string) {
 
@@ -263,8 +264,36 @@ class Hero {
     ninja = 8
   }
 
+  var HeroURLs: {
+    warrior: string;
+    mage: string;
+    hunter: string;
+    rogue: string;
+    warlock: string;
+    priest: string;
+    pirate: string;
+    paladin: string;
+    ninja: string;
+  }
+  = {
+    warrior: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/rona.png",
+    mage: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/celeste.png",
+    hunter: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/ringo.png",
+    rogue: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/glaive.png",
+    warlock: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/krul.png",
+    priest: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/reim.png",
+    pirate: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/koshka.png",
+    paladin: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/blackfeather.png",
+    ninja: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/taka.png"
+  };
+
     this.hname = heroname;
     this.hid = Heroes[heroname];
+    this.hurl = HeroURLs[heroname];
+  }
+
+  public showImage() {
+
   }
 }
 
@@ -275,8 +304,9 @@ class Player {
   sidecolor: string;
   myTurn: boolean;
   energy: number;
+  hero: Hero;
 
-  constructor(id: number) {
+  constructor(id: number, hero: Hero) {
 
     var properties: string[][] = [
         ["◯", "red"],
@@ -285,6 +315,7 @@ class Player {
     var turns: boolean[] = [true, false];
 
     this.id = id;
+    this.hero = hero;
     this.side = properties[id][0];
     this.sidecolor = properties[id][1];
     this.myTurn = turns[id];

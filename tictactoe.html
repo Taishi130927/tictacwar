@@ -36,7 +36,8 @@
   </div>
 
   <div id="wrapper">
-    <i class="fa fa-flag fa-2x icon2"></i>
+    <div><img id="icon2" alt=""></div>
+    <!-- <i class="fa fa-flag fa-2x icon2"></i> -->
     <div class="energy2">
       <div class="energy-bar2"></div>
     </div>
@@ -44,7 +45,8 @@
     <div class="energy1">
       <div class="energy-bar1"></div>
     </div>
-    <i class="fa fa-flag fa-2x icon1"></i>
+    <div ><img id="icon1" alt=""></div>
+    <!-- <i class="fa fa-flag fa-2x icon1"></i> -->
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -57,22 +59,45 @@
     var board = new Board(9);
     var initialized = false;
 
-    var player = new Player(0),
-        enemy = new Player(1);
+    var playerHero, enemyHero;
+    var id = -1;
+    var player = new Player(0, 'warrior'),
+        enemy = new Player(1, 'warrior');
     var game = new Game(player, enemy, board);
     // Game Initialization
     game.initialize();
 
     $('#enter').click(function() {
-      game.socket.emit('emit_room', $('#roomSelector').val());
+
+      game.socket.json.emit('emit_room', {
+
+        room: $('#roomSelector').val(),
+        hero: $('#heroSelector').val()
+
+      });
+
+      playerHero = new Hero($('#heroSelector').val());
+      $('#icon1').attr('src', playerHero.hurl);
+
     });
 
     game.socket.on('emit_id', function(data) {
+      id = data;
+    });
+
+    game.socket.on('emit_hero', function(data) {
 
         if (!initialized) {
 
-          player = new Player(data);
-          enemy = new Player((data + 1) % 2);
+          if (id === -1) id = data.id;
+
+          enemyHero = new Hero(data.heroes[(id + 1) % 2]);
+          console.log(data);
+          $('#icon2').attr('src', enemyHero.hurl);
+
+          player = new Player(id, playerHero);
+          enemy = new Player((id + 1) % 2, enemyHero);
+
           game.player = player;
           game.enemy = enemy;
           initialized = true;

@@ -62,24 +62,21 @@ body {
   padding-top: 100%;
 }
 
-.icon1 {
+#icon1 {
   position: absolute;
   bottom: 0;
   right: 0;
   margin: 5% 5%;
-  font-size: 32px !important;
-  color: skyblue;
+  width: 8%;
 }
 
-.icon2 {
+#icon2 {
   position: absolute;
   top: 0;
   left: 0;
   margin: 5% 5%;
-  font-size: 32px !important;
-  color: #e3671b;
+  width: 8%;
 }
-
 
 #panel {
   position: absolute;
