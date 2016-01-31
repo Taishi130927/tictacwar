@@ -1,3 +1,6 @@
+/// <reference path="lib/jquery.d.ts" />
+/// <reference path="lib/socket.io.d.ts" />
+/// <reference path="lib/mathjs.d.ts" />
 var Game = (function () {
     function Game(player, enemy, board) {
         this.player = player;
@@ -102,7 +105,7 @@ var Game = (function () {
         }
     };
     Game.prototype.updateEnergy = function (isPlayer) {
-        tc = this.timeCount / 10;
+        var tc = this.timeCount / 10;
         if (isPlayer) {
             this.player.energy = Math.min(this.player.energy + 50 * (this.timeLimit - tc) / this.timeLimit, 100);
             $('.energy-bar1').css('top', 100 - this.player.energy + '%');
@@ -143,16 +146,16 @@ var Game = (function () {
         else {
             this.player.myTurn = true;
             $('#indication2').text('Your turn!');
-            this.countOn(60);
+            this.countOn();
         }
     };
     Game.prototype.generateRandomMove = function () {
         var srow, scolumn, grow, gcolumn;
         while (true) {
-            srow = Math.floor(Math.random(1) * this.board.subSize);
-            scolumn = Math.floor(Math.random(1) * this.board.subSize);
-            grow = Math.floor(Math.random(1) * this.board.subSize);
-            gcolumn = Math.floor(Math.random(1) * this.board.subSize);
+            srow = Math.floor(Math.random() * this.board.subSize);
+            scolumn = Math.floor(Math.random() * this.board.subSize);
+            grow = Math.floor(Math.random() * this.board.subSize);
+            gcolumn = Math.floor(Math.random() * this.board.subSize);
             var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
             if (!(check === 1 || check === 0))
                 break;
@@ -185,13 +188,14 @@ var Hero = (function () {
 var Player = (function () {
     function Player(id) {
         var properties = [
-            ["◯", "red", true],
-            ["×", "blue", false]
+            ["◯", "red"],
+            ["×", "blue"]
         ];
+        var turns = [true, false];
         this.id = id;
         this.side = properties[id][0];
         this.sidecolor = properties[id][1];
-        this.myTurn = properties[id][2];
+        this.myTurn = turns[id];
         this.energy = 50;
     }
     return Player;

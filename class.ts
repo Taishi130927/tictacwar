@@ -1,8 +1,16 @@
+/// <reference path="lib/jquery.d.ts" />
+/// <reference path="lib/socket.io.d.ts" />
+/// <reference path="lib/mathjs.d.ts" />
+
 class Game {
 
   player: Player;
   enemy: Player;
   board: Board;
+  timerId: Timer;
+  timeCount: number;
+  timeLimit: number;
+  socket: Socket;
 
   constructor(player: Player, enemy: Player, board: Board) {
 
@@ -156,7 +164,7 @@ class Game {
 
   public updateEnergy(isPlayer: boolean): void {
 
-    tc = this.timeCount / 10;
+    var tc = this.timeCount / 10;
 
     if (isPlayer) {
 
@@ -209,7 +217,7 @@ class Game {
 
       this.player.myTurn = true;
       $('#indication2').text('Your turn!');
-      this.countOn(60);
+      this.countOn();
     }
   }
 
@@ -219,10 +227,10 @@ class Game {
 
     while (true) {
 
-      srow = Math.floor(Math.random(1) * this.board.subSize);
-      scolumn = Math.floor(Math.random(1) * this.board.subSize);
-      grow = Math.floor(Math.random(1) * this.board.subSize);
-      gcolumn = Math.floor(Math.random(1) * this.board.subSize);
+      srow = Math.floor(Math.random() * this.board.subSize);
+      scolumn = Math.floor(Math.random() * this.board.subSize);
+      grow = Math.floor(Math.random() * this.board.subSize);
+      gcolumn = Math.floor(Math.random() * this.board.subSize);
       var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
 
       if (!(check === 1 || check === 0)) break;
@@ -237,6 +245,9 @@ class Game {
 }
 
 class Hero {
+
+  hname: string;
+  hid: number;
 
   constructor(heroname: string) {
 
@@ -259,17 +270,24 @@ class Hero {
 
 class Player {
 
+  id: number;
+  side: string;
+  sidecolor: string;
+  myTurn: boolean;
+  energy: number;
+
   constructor(id: number) {
 
-    var properties = [
-        ["◯", "red", true],
-        ["×", "blue", false]
+    var properties: string[][] = [
+        ["◯", "red"],
+        ["×", "blue"]
       ];
+    var turns: boolean[] = [true, false];
 
     this.id = id;
     this.side = properties[id][0];
     this.sidecolor = properties[id][1];
-    this.myTurn = properties[id][2];
+    this.myTurn = turns[id];
     this.energy = 50;
 
   }
@@ -278,12 +296,17 @@ class Player {
 
 class Board {
 
+  size: number;
+  subSize: number;
+  subGrid: SubBoard[][];
+  globalGrid: number[][];
+
   constructor(size: number) {
 
     this.size = size;
     var subSize: number = Math.sqrt(size);
     this.subSize = subSize;
-    var subGrid: SubBoard[] = new Array(subSize),
+    var subGrid: SubBoard[][] = new Array(subSize),
         globalGrid: number[][] = new Array(subSize);
 
     for (var i = 0; i < subSize; i++){
@@ -372,6 +395,10 @@ class Board {
 
 class SubBoard {
 
+   size: number;
+   occupant: number;
+   grid: number[][];
+
   constructor(size: number) {
 
     this.size = size;
@@ -447,6 +474,8 @@ class SubBoard {
    globalColumn: number;
    subRow: number;
    subColumn: number;
+   player: Player;
+   random: boolean;
 
    constructor(row: number, column: number, player: Player, random: boolean) {
 
