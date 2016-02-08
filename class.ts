@@ -292,8 +292,19 @@ class Hero {
     this.hurl = HeroURLs[heroname];
   }
 
-  public showImage() {
-
+  public power() {
+    switch (this.hid) {
+      case 0: // warrior
+      case 1: // mage
+      case 2: // hunter
+      case 3: // rogue
+      case 4: // warlock
+      case 5: // priest
+      case 6: // pirate
+      case 7: // paladin
+      case 8: // ninja
+      default:
+    }
   }
 }
 

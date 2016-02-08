@@ -45,7 +45,7 @@
     <div class="energy1">
       <div class="energy-bar1"></div>
     </div>
-    <div ><img id="icon1" alt=""></div>
+    <div><img id="icon1" alt=""></div>
     <!-- <i class="fa fa-flag fa-2x icon1"></i> -->
   </div>
 
@@ -81,6 +81,15 @@
 
     });
 
+    $('#icon1').click(function() {
+      console.log('test');
+      //player.hero.power();
+    });
+
+    $('#icon2').click(function() {
+      //player.hero.power();
+    });
+
     game.socket.on('emit_id', function(data) {
       id = data;
     });
@@ -92,7 +101,6 @@
           if (id === -1) id = data.id;
 
           enemyHero = new Hero(data.heroes[(id + 1) % 2]);
-          console.log(data);
           $('#icon2').attr('src', enemyHero.hurl);
 
           player = new Player(id, playerHero);
