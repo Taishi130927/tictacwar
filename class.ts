@@ -162,6 +162,23 @@ class Game {
     }
   }
 
+  public applyHeroPower() {
+
+    switch (this.player.hero.hid) {
+        case 0: // warrior
+        case 1: // mage
+        case 2: // hunter
+        case 3: // rogue
+        case 4: // warlock
+        case 5: // priest
+        case 6: // pirate
+        case 7: // paladin
+        case 8: // ninja
+        default:
+    }
+    this.player.hero.powerOn = false;
+  }
+
   public updateEnergy(isPlayer: boolean): void {
 
     var tc = this.timeCount / 10;
@@ -249,6 +266,7 @@ class Hero {
   hname: string;
   hid: number;
   hurl: string;
+  powerOn: boolean;
 
   constructor(heroname: string) {
 
@@ -290,21 +308,8 @@ class Hero {
     this.hname = heroname;
     this.hid = Heroes[heroname];
     this.hurl = HeroURLs[heroname];
-  }
+    this.powerOn = false;
 
-  public power() {
-    switch (this.hid) {
-      case 0: // warrior
-      case 1: // mage
-      case 2: // hunter
-      case 3: // rogue
-      case 4: // warlock
-      case 5: // priest
-      case 6: // pirate
-      case 7: // paladin
-      case 8: // ninja
-      default:
-    }
   }
 }
 

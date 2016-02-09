@@ -104,6 +104,21 @@ var Game = (function () {
             }
         }
     };
+    Game.prototype.applyHeroPower = function () {
+        switch (this.player.hero.hid) {
+            case 0: // warrior
+            case 1: // mage
+            case 2: // hunter
+            case 3: // rogue
+            case 4: // warlock
+            case 5: // priest
+            case 6: // pirate
+            case 7: // paladin
+            case 8: // ninja
+            default:
+        }
+        this.player.hero.powerOn = false;
+    };
     Game.prototype.updateEnergy = function (isPlayer) {
         var tc = this.timeCount / 10;
         if (isPlayer) {
@@ -194,21 +209,8 @@ var Hero = (function () {
         this.hname = heroname;
         this.hid = Heroes[heroname];
         this.hurl = HeroURLs[heroname];
+        this.powerOn = false;
     }
-    Hero.prototype.power = function () {
-        switch (this.hid) {
-            case 0: // warrior
-            case 1: // mage
-            case 2: // hunter
-            case 3: // rogue
-            case 4: // warlock
-            case 5: // priest
-            case 6: // pirate
-            case 7: // paladin
-            case 8: // ninja
-            default:
-        }
-    };
     return Hero;
 })();
 var Player = (function () {

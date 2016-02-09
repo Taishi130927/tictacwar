@@ -83,11 +83,7 @@
 
     $('#icon1').click(function() {
       console.log('test');
-      //player.hero.power();
-    });
-
-    $('#icon2').click(function() {
-      //player.hero.power();
+      game.player.hero.powerOn = true;
     });
 
     game.socket.on('emit_id', function(data) {
@@ -125,9 +121,16 @@
 
       $('td').click(function() {
 
-        if (game.player.myTurn){
+        if (game.player.hero.powerOn) {
 
-          if ($(this).hasClass('chosen')){
+          var row1 = parseInt($(this).parent().attr('class').charAt(3)),
+              column1 = parseInt($(this).attr('class').charAt(6));
+          var myMove = new Move(row1, column1, game.player, false);
+          game.applyHeroPower(myMove);
+
+        } else if (game.player.myTurn) {
+
+          if ($(this).hasClass('chosen')) {
 
             // alert('Invalid move!');
 
