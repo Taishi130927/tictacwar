@@ -165,11 +165,15 @@ class Game {
 
     switch (this.player.hero.hid) {
         case 0: // warrior
+          break;
+
         case 1: // mage
 
           if (Math.floor(Math.random() * 2) === 0) {
               move.player = new Player(this.enemy.id, this.player.hero);
-            }
+          }
+
+          break;
 
         case 2: // hunter
         case 3: // rogue
@@ -207,7 +211,15 @@ class Game {
       $('.energy-bar1').css('height', this.player.energy + '%');
 
       if (this.player.energy === 100) {
+
         $('.energy-bar1').addClass('energy-bar-full');
+
+        if (this.player.hero.hid === 0 && this.player.hero.miscCount === 0) {
+          // for warrior's ability
+          this.clearEnergy(true);
+          this.player.hero.miscCount++;
+
+        }
       } else {
          $('.energy-bar1').removeClass('energy-bar-full');
       }
@@ -218,7 +230,15 @@ class Game {
       $('.energy-bar2').css('height', this.enemy.energy + '%');
 
       if (this.enemy.energy === 100) {
+
         $('.energy-bar2').addClass('energy-bar-full');
+
+        if(this.enemy.hero.hid === 0 && this.enemy.hero.miscCount === 0) {
+
+            this.clearEnergy(false);
+            this.player.hero.miscCount++;
+
+        }
       } else {
          $('.energy-bar2').removeClass('energy-bar-full');
       }
@@ -303,6 +323,7 @@ class Hero {
   hid: number;
   hurl: string;
   powerOn: boolean;
+  miscCount: number; // warrior: charged oe not,
 
   constructor(heroname: string) {
 
@@ -345,6 +366,7 @@ class Hero {
     this.hid = Heroes[heroname];
     this.hurl = HeroURLs[heroname];
     this.powerOn = false;
+    this.miscCount = 0;
 
   }
 }

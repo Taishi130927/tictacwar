@@ -85,10 +85,13 @@
 
       if (game.player.energy === 100) {
       //console.log('test');
+      if (game.player.hero.hid !== 0 || game.player.hero.miscCount !== 0) {
 
       game.player.hero.powerOn = true;
       game.clearEnergy(true);
        $('#indication2').text('Use Your Ability!');
+
+     }
 
       }
     });
