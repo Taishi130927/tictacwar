@@ -62,21 +62,31 @@ body {
   padding-top: 100%;
 }
 
-#icon1 {
+#heroArea1 {
   position: absolute;
   bottom: 0;
   right: 0;
-  margin: 5% 5%;
-  width: 8%;
+  width: 10%;
+  height: 10%;
+  margin: 2% 2%;
+}
+
+#icon1 {
+  width: 100%;
   cursor: pointer;
 }
 
-#icon2 {
+#heroArea2 {
   position: absolute;
   top: 0;
   left: 0;
-  margin: 5% 5%;
-  width: 8%;
+  width: 10%;
+  height: 10%;
+  margin: 2% 2%;
+}
+
+#icon2 {
+  width: 100%;
 }
 
 #panel {

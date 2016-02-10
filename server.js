@@ -62,6 +62,7 @@ console.log("server listening ...");
 var roomcount = [0, 0]; //room 1,2
 var heroes = ["", ""];
 io.sockets.on('connection', function(socket){
+
   socket.on('emit_room', function(data){
     socket.join(data.room);
     var rnum = data.room.slice(5, data.room.length) - 1;
@@ -96,7 +97,11 @@ io.sockets.on('connection', function(socket){
   });
 
 
-  socket.on('emit_from_client', function(data){
+  socket.on('emit_from_client', function(data) {
     socket.broadcast.to(data.room).emit('emit_from_enemy', data)
+  });
+
+  socket.on('emit_ability_from_client', function(data) {
+    socket.broadcast.to(data).emit('emit_ability_from_enemy', data);
   });
 });

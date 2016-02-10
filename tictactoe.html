@@ -36,8 +36,7 @@
   </div>
 
   <div id="wrapper">
-    <div><img id="icon2" alt=""></div>
-    <!-- <i class="fa fa-flag fa-2x icon2"></i> -->
+    <div id="heroArea2"><img id="icon2" alt=""></div>
     <div class="energy2">
       <div class="energy-bar2"></div>
     </div>
@@ -45,8 +44,7 @@
     <div class="energy1">
       <div class="energy-bar1"></div>
     </div>
-    <div><img id="icon1" alt=""></div>
-    <!-- <i class="fa fa-flag fa-2x icon1"></i> -->
+    <div id="heroArea1"><img id="icon1" alt=""></div>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -69,16 +67,19 @@
 
     $('#enter').click(function() {
 
-      game.socket.json.emit('emit_room', {
+        if (id === -1) {
 
-        room: $('#roomSelector').val(),
-        hero: $('#heroSelector').val()
+        game.socket.json.emit('emit_room', {
 
-      });
+          room: $('#roomSelector').val(),
+          hero: $('#heroSelector').val()
 
-      playerHero = new Hero($('#heroSelector').val());
-      $('#icon1').attr('src', playerHero.hurl);
+        });
 
+        playerHero = new Hero($('#heroSelector').val());
+        $('#icon1').attr('src', playerHero.hurl);
+
+      }
     });
 
     $('#icon1').click(function() {
@@ -86,6 +87,8 @@
       if (game.player.energy === 100) {
       //console.log('test');
       if (game.player.hero.hid !== 0 || game.player.hero.miscCount !== 0) {
+
+      game.socket.emit('emit_ability_from_client', $('#roomSelector').val());
 
       game.player.hero.powerOn = true;
       game.clearEnergy(true);
@@ -133,11 +136,14 @@
 
         if (game.player.hero.powerOn) {
 
+          if (!$(this).hasClass('chosen')) {
+
           var row1 = parseInt($(this).parent().attr('class').charAt(3)),
               column1 = parseInt($(this).attr('class').charAt(6));
           var myMove = new Move(row1, column1, game.player, false);
           game.applyHeroPower(myMove);
 
+          }
         } else if (game.player.myTurn) {
 
           if ($(this).hasClass('chosen')) {
@@ -176,8 +182,9 @@
         }
       });
 
-      game.socket.on('emit_ability_signal', function(data) {
+      game.socket.on('emit_ability_from_enemy', function(data) {
         //game.enemy.hero.powerOn = true;
+        $('#heroArea2 div').remove();
         game.clearEnergy(false);
       });
 

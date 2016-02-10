@@ -161,8 +161,6 @@ class Game {
 
   public applyHeroPower(move: Move): void {
 
-    this.socket.emit('emit_ability_signal');
-
     switch (this.player.hero.hid) {
         case 0: // warrior
           break;
@@ -195,7 +193,9 @@ class Game {
 
     });
 
+    $('#heroArea').text('');
     $('#indication2').text('Your Turn!');
+    $('#heroArea1 div').remove();
     this.player.hero.powerOn = false;
 
   }
@@ -218,6 +218,7 @@ class Game {
           // for warrior's ability
           this.clearEnergy(true);
           this.player.hero.miscCount++;
+          $('#heroArea1').append('<div>charged</div>');
 
         }
       } else {
@@ -230,15 +231,7 @@ class Game {
       $('.energy-bar2').css('height', this.enemy.energy + '%');
 
       if (this.enemy.energy === 100) {
-
         $('.energy-bar2').addClass('energy-bar-full');
-
-        if(this.enemy.hero.hid === 0 && this.enemy.hero.miscCount === 0) {
-
-            this.clearEnergy(false);
-            this.player.hero.miscCount++;
-
-        }
       } else {
          $('.energy-bar2').removeClass('energy-bar-full');
       }
