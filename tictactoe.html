@@ -82,8 +82,15 @@
     });
 
     $('#icon1').click(function() {
-      console.log('test');
+
+      if (game.player.energy === 100) {
+      //console.log('test');
+
       game.player.hero.powerOn = true;
+      game.clearEnergy(true);
+       $('#indication2').text('Use Your Ability!');
+
+      }
     });
 
     game.socket.on('emit_id', function(data) {
@@ -165,6 +172,13 @@
           game.switchTurn(false);
         }
       });
+
+      game.socket.on('emit_ability_signal', function(data) {
+        //game.enemy.hero.powerOn = true;
+        game.clearEnergy(false);
+      });
+
+
 
 
     });

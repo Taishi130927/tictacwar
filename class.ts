@@ -120,7 +120,7 @@ class Game {
       if (!move.random) {
 
         this.updateEnergy(true);
-        move.player = this.player;
+        //move.player = this.player;
 
       }
 
@@ -154,19 +154,23 @@ class Game {
       }
 
        if (move.random) {
-
-        //this.updateEnergy();
         this.switchTurn(false);
-
        }
     }
   }
 
-  public applyHeroPower() {
+  public applyHeroPower(move: Move): void {
+
+    this.socket.emit('emit_ability_signal');
 
     switch (this.player.hero.hid) {
         case 0: // warrior
         case 1: // mage
+
+          if (Math.floor(Math.random() * 2) === 0) {
+              move.player = new Player(this.enemy.id, this.player.hero);
+            }
+
         case 2: // hunter
         case 3: // rogue
         case 4: // warlock
@@ -176,7 +180,20 @@ class Game {
         case 8: // ninja
         default:
     }
+
+    this.board.update(move);
+    this.board.display(move);
+
+    this.socket.json.emit('emit_from_client', {
+
+        room: $('#roomSelector').val(),
+        enemyMove: move
+
+    });
+
+    $('#indication2').text('Your Turn!');
     this.player.hero.powerOn = false;
+
   }
 
   public updateEnergy(isPlayer: boolean): void {
@@ -205,6 +222,25 @@ class Game {
       } else {
          $('.energy-bar2').removeClass('energy-bar-full');
       }
+
+    }
+  }
+
+  public clearEnergy(isPlayer: boolean): void {
+
+    if (isPlayer) {
+
+        this.player.energy = 0;
+        $('.energy-bar1').css('top', '100%');
+        $('.energy-bar1').css('height', '0%');
+        $('.energy-bar1').removeClass('energy-bar-full');
+
+    } else {
+
+        this.enemy.energy = 0;
+        $('.energy-bar2').css('top', '100%');
+        $('.energy-bar2').css('height', '0%');
+        $('.energy-bar2').removeClass('energy-bar-full');
 
     }
   }
@@ -376,8 +412,6 @@ class Board {
 
     this.subGrid[move.globalRow][move.globalColumn].update(move);
     this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
-
-    // console.log(this.globalGrid);
 
   }
 

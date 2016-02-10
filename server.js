@@ -71,10 +71,11 @@ io.sockets.on('connection', function(socket){
 
      if (heroes[0] === "" && heroes[1] === "") {
       heroes[id] = data.hero;
+      console.log(heroes);
     } else {
 
       heroes[id] = data.hero;
-      //console.log(heroes);
+      console.log(heroes);
       socket.json.emit('emit_hero', {
 
         heroes: heroes,
