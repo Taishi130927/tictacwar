@@ -88,14 +88,13 @@
       //console.log('test');
       if (game.player.hero.hid !== 0 || game.player.hero.miscCount !== 0) {
 
-      game.socket.emit('emit_ability_from_client', $('#roomSelector').val());
+        game.socket.emit('emit_ability_from_client', $('#roomSelector').val());
 
-      game.player.hero.powerOn = true;
-      game.clearEnergy(true);
-       $('#indication2').text('Use Your Ability!');
+          game.player.hero.powerOn = true;
+          game.clearEnergy(true);
+           $('#indication2').text('Use Your Ability!');
 
-     }
-
+        }
       }
     });
 
@@ -186,11 +185,15 @@
         //game.enemy.hero.powerOn = true;
         $('#heroArea2 div').remove();
         game.clearEnergy(false);
+
       });
 
+      game.socket.on('emit_secret_from_enemy', function(data) {
 
+        var move = data.enemyMove;
+        game.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = 2;
 
-
+      });
     });
   </script>
 </body>

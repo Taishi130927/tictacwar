@@ -119,9 +119,24 @@ class Game {
 
       if (!move.random) {
 
-        this.updateEnergy(true);
-        //move.player = this.player;
+          console.log(this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn]);
 
+        switch (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn]) {
+
+          case 0:
+          case 1:
+            this.updateEnergy(true);
+            break;
+
+          case 2:
+            this.clearEnergy(true);
+            break;
+
+          case 3:
+          default:
+            break;
+
+        }
       }
 
       this.socket.json.emit('emit_from_client', {
@@ -162,7 +177,19 @@ class Game {
   public applyHeroPower(move: Move): void {
 
     switch (this.player.hero.hid) {
+
         case 0: // warrior
+
+          this.board.update(move);
+          this.board.display(move);
+
+          this.socket.json.emit('emit_from_client', {
+
+              room: $('#roomSelector').val(),
+              enemyMove: move
+
+          });
+
           break;
 
         case 1: // mage
@@ -171,9 +198,34 @@ class Game {
               move.player = new Player(this.enemy.id, this.player.hero);
           }
 
+          this.board.update(move);
+          this.board.display(move);
+
+          this.socket.json.emit('emit_from_client', {
+
+              room: $('#roomSelector').val(),
+              enemyMove: move
+
+          });
+
           break;
 
         case 2: // hunter
+
+          this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = 2;
+          var row: number = move.globalRow * 3 + move.subRow;
+          var column: number = move.globalColumn * 3 + move.subColumn;
+          $('.row' + row + ' .column' + column).addClass('chosen new').text('T').css('color', move.player.sidecolor).attr('data-side', move.player.side);
+
+          this.socket.json.emit('emit_secret_from_client', {
+
+              room: $('#roomSelector').val(),
+              enemyMove: move
+
+          });
+
+          break;
+
         case 3: // rogue
         case 4: // warlock
         case 5: // priest
@@ -182,16 +234,6 @@ class Game {
         case 8: // ninja
         default:
     }
-
-    this.board.update(move);
-    this.board.display(move);
-
-    this.socket.json.emit('emit_from_client', {
-
-        room: $('#roomSelector').val(),
-        enemyMove: move
-
-    });
 
     $('#heroArea').text('');
     $('#indication2').text('Your Turn!');
@@ -443,7 +485,7 @@ class Board {
       $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
     }
 
-    if (!move.random) $('td').removeClass('new');
+    if ($('.new').length >= 2 && !move.random) $('td').removeClass('new');
     $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
 
   }

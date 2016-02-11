@@ -76,7 +76,19 @@ var Game = (function () {
         this.board.display(move);
         if (move.player === this.player) {
             if (!move.random) {
-                this.updateEnergy(true);
+                console.log(this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn]);
+                switch (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn]) {
+                    case 0:
+                    case 1:
+                        this.updateEnergy(true);
+                        break;
+                    case 2:
+                        this.clearEnergy(true);
+                        break;
+                    case 3:
+                    default:
+                        break;
+                }
             }
             this.socket.json.emit('emit_from_client', {
                 room: $('#roomSelector').val(),
@@ -105,13 +117,34 @@ var Game = (function () {
     Game.prototype.applyHeroPower = function (move) {
         switch (this.player.hero.hid) {
             case 0:
+                this.board.update(move);
+                this.board.display(move);
+                this.socket.json.emit('emit_from_client', {
+                    room: $('#roomSelector').val(),
+                    enemyMove: move
+                });
                 break;
             case 1:
                 if (Math.floor(Math.random() * 2) === 0) {
                     move.player = new Player(this.enemy.id, this.player.hero);
                 }
+                this.board.update(move);
+                this.board.display(move);
+                this.socket.json.emit('emit_from_client', {
+                    room: $('#roomSelector').val(),
+                    enemyMove: move
+                });
                 break;
-            case 2: // hunter
+            case 2:
+                this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = 2;
+                var row = move.globalRow * 3 + move.subRow;
+                var column = move.globalColumn * 3 + move.subColumn;
+                $('.row' + row + ' .column' + column).addClass('chosen new').text('T').css('color', move.player.sidecolor).attr('data-side', move.player.side);
+                this.socket.json.emit('emit_secret_from_client', {
+                    room: $('#roomSelector').val(),
+                    enemyMove: move
+                });
+                break;
             case 3: // rogue
             case 4: // warlock
             case 5: // priest
@@ -120,12 +153,6 @@ var Game = (function () {
             case 8: // ninja
             default:
         }
-        this.board.update(move);
-        this.board.display(move);
-        this.socket.json.emit('emit_from_client', {
-            room: $('#roomSelector').val(),
-            enemyMove: move
-        });
         $('#heroArea').text('');
         $('#indication2').text('Your Turn!');
         $('#heroArea1 div').remove();
@@ -289,7 +316,7 @@ var Board = (function () {
         if (occupant !== -1) {
             $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
         }
-        if (!move.random)
+        if ($('.new').length >= 2 && !move.random)
             $('td').removeClass('new');
         $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
     };
