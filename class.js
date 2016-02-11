@@ -72,24 +72,24 @@ var Game = (function () {
         }
     };
     Game.prototype.processMove = function (move) {
-        this.board.update(move);
-        this.board.display(move);
         if (move.player === this.player) {
             if (!move.random) {
-                console.log(this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn]);
                 switch (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn]) {
                     case 0:
                     case 1:
-                        this.updateEnergy(true);
                         break;
                     case 2:
                         this.clearEnergy(true);
+                        alert('Stepped on a Trap!');
                         break;
                     case 3:
                     default:
+                        this.updateEnergy(true);
                         break;
                 }
             }
+            this.board.update(move);
+            this.board.display(move);
             this.socket.json.emit('emit_from_client', {
                 room: $('#roomSelector').val(),
                 enemyMove: move
@@ -103,8 +103,10 @@ var Game = (function () {
             }
         }
         else {
-            this.enemy = move.player;
+            this.enemy = move.player; // to update enemy's energy
             this.updateEnergy(false);
+            this.board.update(move);
+            this.board.display(move);
             if (!this.board.gameOn(move)) {
                 alert('You lose!');
                 location.href = "";
