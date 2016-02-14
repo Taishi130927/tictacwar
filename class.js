@@ -73,45 +73,32 @@ var Game = (function () {
     };
     Game.prototype.processMove = function (move) {
         if (move.player === this.player) {
-            if (!move.random) {
-                switch (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn]) {
-                    case 0:
-                    case 1:
-                        break;
-                    case 2:
-                        this.clearEnergy(true);
-                        alert('Stepped on a Trap!');
-                        this.switchTurn(false);
-                        this.socket.json.emit('emit_from_client', {
-                            room: $('#roomSelector').val(),
-                            enemyMove: move
-                        });
-                        this.board.update(move);
-                        this.board.display(move);
-                        return;
-                        break;
-                    case 3:
-                    default:
-                        this.updateEnergy(true);
-                        break;
-                }
-            }
-            if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === 2) {
+            if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === this.enemy.id + 2) {
                 this.clearEnergy(true);
-                alert('Stepped on a Trap!');
+                this.board.update(move);
+                this.board.display(move);
+                this.socket.json.emit('emit_from_client', {
+                    room: $('#roomSelector').val(),
+                    enemyMove: move
+                });
+                if (!move.random)
+                    this.switchTurn(false);
             }
-            this.board.update(move);
-            this.board.display(move);
-            this.socket.json.emit('emit_from_client', {
-                room: $('#roomSelector').val(),
-                enemyMove: move
-            });
-            if (!this.board.gameOn(move)) {
-                alert('You win!');
-                location.href = "";
-            }
-            if (!move.random) {
-                this.switchTurn(false);
+            else {
+                if (!move.random)
+                    this.updateEnergy(true);
+                this.board.update(move);
+                this.board.display(move);
+                this.socket.json.emit('emit_from_client', {
+                    room: $('#roomSelector').val(),
+                    enemyMove: move
+                });
+                if (!this.board.gameOn(move)) {
+                    alert('You win!');
+                    location.href = "";
+                }
+                if (!move.random)
+                    this.switchTurn(false);
             }
         }
         else {
@@ -123,9 +110,8 @@ var Game = (function () {
                 alert('You lose!');
                 location.href = "";
             }
-            if (move.random) {
+            if (move.random)
                 this.switchTurn(false);
-            }
         }
     };
     Game.prototype.applyHeroPower = function (move) {
@@ -150,8 +136,8 @@ var Game = (function () {
                 });
                 break;
             case 2:
-                if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== 2) {
-                    this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = 2;
+                if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== this.enemy.id + 2) {
+                    this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = this.player.id + 2;
                     var row = move.globalRow * 3 + move.subRow;
                     var column = move.globalColumn * 3 + move.subColumn;
                     $('.row' + row + ' .column' + column).addClass('chosen new').text('!').css('color', move.player.sidecolor).attr('data-side', move.player.side);
@@ -164,7 +150,6 @@ var Game = (function () {
                     this.board.update(move);
                     this.board.display(move);
                     this.clearEnergy(true);
-                    alert('Stepped on a Trap!');
                     this.socket.json.emit('emit_from_client', {
                         room: $('#roomSelector').val(),
                         enemyMove: move
@@ -256,7 +241,7 @@ var Game = (function () {
             grow = Math.floor(Math.random() * this.board.subSize);
             gcolumn = Math.floor(Math.random() * this.board.subSize);
             var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
-            if (!(check === 1 || check === 0))
+            if (!(check === 1 || check === 0 || check === this.player.id + 2))
                 break;
         }
         var row = grow * 3 + srow, column = gcolumn * 3 + scolumn;
@@ -340,7 +325,10 @@ var Board = (function () {
         var row = 3 * move.globalRow + move.subRow, column = 3 * move.globalColumn + move.subColumn;
         if (this.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === undefined) {
             // when a trap is activated
-            $('.row' + row + ' .column' + column).removeClass('chosen').text('');
+            alert('Trapped!');
+            if (!move.random)
+                $('td').removeClass('new');
+            $('.row' + row + ' .column' + column).removeClass('chosen').addClass('new').text('');
         }
         else {
             var occupant = this.globalGrid[move.globalRow][move.globalColumn];
@@ -388,7 +376,7 @@ var SubBoard = (function () {
         this.grid = grid;
     }
     SubBoard.prototype.update = function (move) {
-        if (this.grid[move.subRow][move.subColumn] === 2) {
+        if (this.grid[move.subRow][move.subColumn] === 2 || this.grid[move.subRow][move.subColumn] === 3) {
             this.grid[move.subRow][move.subColumn] = undefined;
         }
         else {

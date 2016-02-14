@@ -84,7 +84,7 @@
 
     $('#icon1').click(function() {
 
-      if (game.player.energy === 100) {
+      if (game.player.energy === 100 && game.player.myTurn) {
       //console.log('test');
       if (game.player.hero.hid !== 0 || game.player.hero.miscCount !== 0) {
 
@@ -194,7 +194,7 @@
       game.socket.on('emit_secret_from_enemy', function(data) {
 
         var move = data.enemyMove;
-        game.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = 2;
+        game.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = 2 + game.enemy.id;
 
       });
     });
