@@ -78,21 +78,23 @@
 
         playerHero = new Hero($('#heroSelector').val());
         $('#icon1').attr('src', playerHero.hurl);
+        if (playerHero.hid === 0) $('#heroArea1').append('<div>charged: ' + playerHero.miscCount + '</div>');
+
 
       }
     });
 
     $('#icon1').click(function() {
 
-      if (game.player.energy === 100 && game.player.myTurn) {
+      if (game.player.myTurn) {
       //console.log('test');
-      if (game.player.hero.hid !== 0 || game.player.hero.miscCount !== 0) {
+        if ((game.player.hero.hid !== 0 && game.player.energy === 100 )|| (game.player.hero.hid === 0 && game.player.hero.miscCount !== 0)) {
 
-        game.socket.emit('emit_ability_from_client', $('#roomSelector').val());
+          game.socket.emit('emit_ability_from_client', $('#roomSelector').val());
 
           game.player.hero.powerOn = true;
           game.clearEnergy(true);
-           $('#indication2').text('Use Your Ability!');
+          $('#indication2').text('Use Your Ability!');
 
         }
       }
@@ -139,12 +141,20 @@
 
         if (game.player.hero.powerOn) {
 
-          if (!$(this).hasClass('chosen')) {
+          if (game.player.hero.hid !== 3 && !$(this).hasClass('chosen')) {
 
-          var row1 = parseInt($(this).parent().attr('class').charAt(3)),
-              column1 = parseInt($(this).attr('class').charAt(6));
-          var myMove = new Move(row1, column1, game.player, false);
-          game.applyHeroPower(myMove);
+            var row1 = parseInt($(this).parent().attr('class').charAt(3)),
+                column1 = parseInt($(this).attr('class').charAt(6));
+            var myMove = new Move(row1, column1, game.player, false);
+            game.applyHeroPower(myMove);
+
+          } else if (game.player.hero.hid === 3 && $(this).hasClass('chosen')) {
+
+            var row1 = parseInt($(this).parent().attr('class').charAt(3)),
+                column1 = parseInt($(this).attr('class').charAt(6));
+            var myMove = new Move(row1, column1, game.player, false);
+
+            if (game.board.subGrid[myMove.globalRow][myMove.globalColumn].grid[myMove.subRow][myMove.subColumn] === game.enemy.id) game.applyHeroPower(myMove);
 
           }
         } else if (game.player.myTurn) {

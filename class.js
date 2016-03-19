@@ -123,10 +123,14 @@ var Game = (function () {
                     room: $('#roomSelector').val(),
                     enemyMove: move
                 });
+                this.player.hero.miscCount--;
+                $('#heroArea1 div').remove();
+                $('#heroArea1').append('<div>charged: ' + this.player.hero.miscCount + '</div>');
                 break;
             case 1:
                 if (Math.floor(Math.random() * 2) === 0) {
                     move.player = new Player(this.enemy.id, this.player.hero);
+                    move.player.energy = 0;
                 }
                 this.board.update(move);
                 this.board.display(move);
@@ -156,7 +160,24 @@ var Game = (function () {
                     });
                 }
                 break;
-            case 3: // rogue
+            case 3:
+                this.board.update(move);
+                this.board.display(move);
+                this.socket.json.emit('emit_from_client', {
+                    room: $('#roomSelector').val(),
+                    enemyMove: move
+                });
+                var transferredMove = this.generateRandomMove();
+                transferredMove.player = new Player(this.enemy.id, this.player.hero);
+                transferredMove.player.energy = 0;
+                transferredMove.random = false;
+                this.board.update(transferredMove);
+                this.board.display(transferredMove);
+                this.socket.json.emit('emit_from_client', {
+                    room: $('#roomSelector').val(),
+                    enemyMove: transferredMove
+                });
+                break;
             case 4: // warlock
             case 5: // priest
             case 6: // pirate
@@ -164,9 +185,10 @@ var Game = (function () {
             case 8: // ninja
             default:
         }
-        $('#indication2').text('Your Turn!');
-        $('#heroArea1 div').remove();
-        this.player.hero.powerOn = false;
+        if (this.player.hero.hid !== 0 || this.player.hero.miscCount === 0) {
+            $('#indication2').text('Your Turn!');
+            this.player.hero.powerOn = false;
+        }
     };
     Game.prototype.updateEnergy = function (isPlayer) {
         var tc = this.timeCount / 10;
@@ -176,11 +198,12 @@ var Game = (function () {
             $('.energy-bar1').css('height', this.player.energy + '%');
             if (this.player.energy === 100) {
                 $('.energy-bar1').addClass('energy-bar-full');
-                if (this.player.hero.hid === 0 && this.player.hero.miscCount === 0) {
+                if (this.player.hero.hid === 0) {
                     // for warrior's ability
                     this.clearEnergy(true);
                     this.player.hero.miscCount++;
-                    $('#heroArea1').append('<div>charged</div>');
+                    $('#heroArea1 div').remove();
+                    $('#heroArea1').append('<div>charged: ' + this.player.hero.miscCount + '</div>');
                 }
             }
             else {
@@ -324,8 +347,8 @@ var Board = (function () {
         var player = move.player;
         var row = 3 * move.globalRow + move.subRow, column = 3 * move.globalColumn + move.subColumn;
         if (this.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === undefined) {
-            // when a trap is activated
-            alert('Trapped!');
+            // when Hunter's or Rogue's ability is acviated
+            alert('Ability Activated!');
             if (!move.random)
                 $('td').removeClass('new');
             $('.row' + row + ' .column' + column).removeClass('chosen').addClass('new').text('');
@@ -376,7 +399,7 @@ var SubBoard = (function () {
         this.grid = grid;
     }
     SubBoard.prototype.update = function (move) {
-        if (this.grid[move.subRow][move.subColumn] === 2 || this.grid[move.subRow][move.subColumn] === 3) {
+        if (this.grid[move.subRow][move.subColumn] !== undefined) {
             this.grid[move.subRow][move.subColumn] = undefined;
         }
         else {
