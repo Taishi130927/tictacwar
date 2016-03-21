@@ -75,7 +75,7 @@ var Game = (function () {
         if (move.player === this.player) {
             if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === this.enemy.id + 2) {
                 this.clearEnergy(true);
-                this.board.update(move);
+                this.board.update(move, move.player.id);
                 this.board.display(move);
                 this.socket.json.emit('emit_from_client', {
                     room: $('#roomSelector').val(),
@@ -87,7 +87,7 @@ var Game = (function () {
             else {
                 if (!move.random)
                     this.updateEnergy(true);
-                this.board.update(move);
+                this.board.update(move, move.player.id);
                 this.board.display(move);
                 this.socket.json.emit('emit_from_client', {
                     room: $('#roomSelector').val(),
@@ -104,7 +104,7 @@ var Game = (function () {
         else {
             this.enemy = move.player; // to update enemy's energy
             this.updateEnergy(false);
-            this.board.update(move);
+            this.board.update(move, move.player.id);
             this.board.display(move);
             if (!this.board.gameOn(move)) {
                 alert('You lose!');
@@ -117,7 +117,7 @@ var Game = (function () {
     Game.prototype.applyHeroPower = function (move) {
         switch (this.player.hero.hid) {
             case 0:
-                this.board.update(move);
+                this.board.update(move, move.player.id);
                 this.board.display(move);
                 this.socket.json.emit('emit_from_client', {
                     room: $('#roomSelector').val(),
@@ -131,8 +131,9 @@ var Game = (function () {
                 if (Math.floor(Math.random() * 2) === 0) {
                     move.player = new Player(this.enemy.id, this.player.hero);
                     move.player.energy = 0;
+                    move.player.id = this.player.id;
                 }
-                this.board.update(move);
+                this.board.update(move, move.player.id);
                 this.board.display(move);
                 this.socket.json.emit('emit_from_client', {
                     room: $('#roomSelector').val(),
@@ -141,7 +142,8 @@ var Game = (function () {
                 break;
             case 2:
                 if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== this.enemy.id + 2) {
-                    this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = this.player.id + 2;
+                    this.board.update(move, move.player.id + 2);
+                    //display変更必要
                     var row = move.globalRow * 3 + move.subRow;
                     var column = move.globalColumn * 3 + move.subColumn;
                     $('.row' + row + ' .column' + column).addClass('chosen new').text('!').css('color', move.player.sidecolor).attr('data-side', move.player.side);
@@ -151,9 +153,9 @@ var Game = (function () {
                     });
                 }
                 else {
-                    this.board.update(move);
+                    this.board.update(move, move.player.id);
                     this.board.display(move);
-                    this.clearEnergy(true);
+                    //this.clearEnergy(true);
                     this.socket.json.emit('emit_from_client', {
                         room: $('#roomSelector').val(),
                         enemyMove: move
@@ -161,7 +163,7 @@ var Game = (function () {
                 }
                 break;
             case 3:
-                this.board.update(move);
+                this.board.update(move, move.player.id);
                 this.board.display(move);
                 this.socket.json.emit('emit_from_client', {
                     room: $('#roomSelector').val(),
@@ -171,7 +173,7 @@ var Game = (function () {
                 transferredMove.player = new Player(this.enemy.id, this.player.hero);
                 transferredMove.player.energy = 0;
                 transferredMove.random = false;
-                this.board.update(transferredMove);
+                this.board.update(transferredMove, transferredMove.player.id);
                 this.board.display(transferredMove);
                 this.socket.json.emit('emit_from_client', {
                     room: $('#roomSelector').val(),
@@ -339,8 +341,8 @@ var Board = (function () {
         this.subGrid = subGrid;
         this.globalGrid = globalGrid;
     }
-    Board.prototype.update = function (move) {
-        this.subGrid[move.globalRow][move.globalColumn].update(move);
+    Board.prototype.update = function (move, type) {
+        this.subGrid[move.globalRow][move.globalColumn].update(move, type);
         this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
     };
     Board.prototype.display = function (move) {
@@ -358,10 +360,11 @@ var Board = (function () {
             if (occupant !== -1) {
                 $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
             }
-            if ($('.new').length >= 2 && !move.random)
+            if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id)
                 $('td').removeClass('new');
             $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
         }
+        this.lastMove = move;
     };
     Board.prototype.gameOn = function (move) {
         var row = move.globalRow, column = move.globalColumn, side = move.player.id;
@@ -398,12 +401,12 @@ var SubBoard = (function () {
         }
         this.grid = grid;
     }
-    SubBoard.prototype.update = function (move) {
+    SubBoard.prototype.update = function (move, type) {
         if (this.grid[move.subRow][move.subColumn] !== undefined) {
             this.grid[move.subRow][move.subColumn] = undefined;
         }
         else {
-            this.grid[move.subRow][move.subColumn] = move.player.id;
+            this.grid[move.subRow][move.subColumn] = type;
         }
     };
     SubBoard.prototype.occupationUpdate = function (move) {

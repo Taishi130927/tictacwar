@@ -117,7 +117,7 @@ class Game {
       if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === this.enemy.id + 2) {
 
           this.clearEnergy(true);
-          this.board.update(move);
+          this.board.update(move, move.player.id)
           this.board.display(move);
 
           this.socket.json.emit('emit_from_client', {
@@ -132,7 +132,7 @@ class Game {
       } else {
 
         if (!move.random) this.updateEnergy(true);
-        this.board.update(move);
+        this.board.update(move, move.player.id)
         this.board.display(move);
 
         this.socket.json.emit('emit_from_client', {
@@ -156,7 +156,7 @@ class Game {
       this.enemy = move.player; // to update enemy's energy
       this.updateEnergy(false);
 
-      this.board.update(move);
+      this.board.update(move, move.player.id)
       this.board.display(move);
 
       if (!this.board.gameOn(move)) {
@@ -177,7 +177,7 @@ class Game {
 
         case 0: // warrior
 
-          this.board.update(move);
+          this.board.update(move, move.player.id);
           this.board.display(move);
 
           this.socket.json.emit('emit_from_client', {
@@ -200,10 +200,11 @@ class Game {
 
               move.player = new Player(this.enemy.id, this.player.hero);
               move.player.energy = 0;
+              move.player.id = this.player.id;
 
           }
 
-          this.board.update(move);
+          this.board.update(move, move.player.id)
           this.board.display(move);
 
           this.socket.json.emit('emit_from_client', {
@@ -219,7 +220,9 @@ class Game {
 
           if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== this.enemy.id + 2) {
 
-            this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] = this.player.id + 2;
+            this.board.update(move, move.player.id + 2);
+
+            //display変更必要
             var row: number = move.globalRow * 3 + move.subRow;
             var column: number = move.globalColumn * 3 + move.subColumn;
             $('.row' + row + ' .column' + column).addClass('chosen new').text('!').css('color', move.player.sidecolor).attr('data-side', move.player.side);
@@ -232,9 +235,9 @@ class Game {
             });
           } else {
 
-            this.board.update(move);
+            this.board.update(move, move.player.id)
             this.board.display(move);
-            this.clearEnergy(true);
+            //this.clearEnergy(true);
 
             this.socket.json.emit('emit_from_client', {
 
@@ -248,7 +251,7 @@ class Game {
 
         case 3: // rogue
 
-          this.board.update(move);
+          this.board.update(move, move.player.id)
           this.board.display(move);
 
           this.socket.json.emit('emit_from_client', {
@@ -263,7 +266,7 @@ class Game {
           transferredMove.player.energy = 0;
           transferredMove.random = false;
 
-          this.board.update(transferredMove);
+          this.board.update(transferredMove, transferredMove.player.id);
           this.board.display(transferredMove);
 
           this.socket.json.emit('emit_from_client', {
@@ -276,6 +279,8 @@ class Game {
           break;
 
         case 4: // warlock
+
+
         case 5: // priest
         case 6: // pirate
         case 7: // paladin
@@ -491,6 +496,7 @@ class Board {
   subSize: number;
   subGrid: SubBoard[][];
   globalGrid: number[][];
+  lastMove: Move;
 
   constructor(size: number) {
 
@@ -516,10 +522,10 @@ class Board {
 
   }
 
-  public update(move: Move): void {
+  public update(move: Move, type: number): void {
 
-    this.subGrid[move.globalRow][move.globalColumn].update(move);
-    this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
+    this.subGrid[move.globalRow][move.globalColumn].update(move, type);
+    this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move)
 
   }
 
@@ -544,10 +550,12 @@ class Board {
         $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
       }
 
-      if ($('.new').length >= 2 && !move.random) $('td').removeClass('new');
+      if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id) $('td').removeClass('new');
       $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
 
     }
+
+    this.lastMove = move;
   }
 
   public gameOn(move: Move): boolean {
@@ -611,11 +619,12 @@ class SubBoard {
 
   }
 
-  public update(move: Move): void {
+  public update(move: Move, type: number): void {
+
     if (this.grid[move.subRow][move.subColumn] !== undefined) {
       this.grid[move.subRow][move.subColumn] = undefined;
     } else {
-      this.grid[move.subRow][move.subColumn] = move.player.id;
+      this.grid[move.subRow][move.subColumn] = type;
     }
   }
 
