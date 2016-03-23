@@ -118,7 +118,7 @@ class Game {
 
           this.clearEnergy(true);
           this.board.update(move, move.player.id)
-          this.board.display(move);
+          this.board.display(move, move.player.id);
 
           this.socket.json.emit('emit_from_client', {
 
@@ -133,7 +133,7 @@ class Game {
 
         if (!move.random) this.updateEnergy(true);
         this.board.update(move, move.player.id)
-        this.board.display(move);
+        this.board.display(move, move.player.id);
 
         this.socket.json.emit('emit_from_client', {
 
@@ -157,7 +157,7 @@ class Game {
       this.updateEnergy(false);
 
       this.board.update(move, move.player.id)
-      this.board.display(move);
+      this.board.display(move, move.player.id);
 
       if (!this.board.gameOn(move)) {
 
@@ -178,7 +178,7 @@ class Game {
         case 0: // warrior
 
           this.board.update(move, move.player.id);
-          this.board.display(move);
+          this.board.display(move, move.player.id);
 
           this.socket.json.emit('emit_from_client', {
 
@@ -205,7 +205,7 @@ class Game {
           }
 
           this.board.update(move, move.player.id)
-          this.board.display(move);
+          this.board.display(move, move.player.id);
 
           this.socket.json.emit('emit_from_client', {
 
@@ -221,11 +221,10 @@ class Game {
           if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== this.enemy.id + 2) {
 
             this.board.update(move, move.player.id + 2);
-
-            //display変更必要
-            var row: number = move.globalRow * 3 + move.subRow;
-            var column: number = move.globalColumn * 3 + move.subColumn;
-            $('.row' + row + ' .column' + column).addClass('chosen new').text('!').css('color', move.player.sidecolor).attr('data-side', move.player.side);
+            this.board.display(move, move.player.id + 2);
+            // var row: number = move.globalRow * 3 + move.subRow;
+            // var column: number = move.globalColumn * 3 + move.subColumn;
+            // $('.row' + row + ' .column' + column).addClass('chosen new').text('!').css('color', move.player.sidecolor).attr('data-side', move.player.side);
 
             this.socket.json.emit('emit_secret_from_client', {
 
@@ -236,7 +235,7 @@ class Game {
           } else {
 
             this.board.update(move, move.player.id)
-            this.board.display(move);
+            this.board.display(move, move.player.id);
             //this.clearEnergy(true);
 
             this.socket.json.emit('emit_from_client', {
@@ -252,7 +251,7 @@ class Game {
         case 3: // rogue
 
           this.board.update(move, move.player.id)
-          this.board.display(move);
+          this.board.display(move, move.player.id);
 
           this.socket.json.emit('emit_from_client', {
 
@@ -267,7 +266,7 @@ class Game {
           transferredMove.random = false;
 
           this.board.update(transferredMove, transferredMove.player.id);
-          this.board.display(transferredMove);
+          this.board.display(transferredMove, transferredMove.player.id);
 
           this.socket.json.emit('emit_from_client', {
 
@@ -279,6 +278,8 @@ class Game {
           break;
 
         case 4: // warlock
+
+
 
 
         case 5: // priest
@@ -529,7 +530,7 @@ class Board {
 
   }
 
-  public display(move: Move): void {
+  public display(move: Move, type: number): void {
 
     var player = move.player;
     var row = 3 * move.globalRow + move.subRow,
@@ -550,8 +551,30 @@ class Board {
         $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
       }
 
+      var displayText: string;
+
+      switch (type) {
+
+        case 0:
+        case 1:
+          displayText = player.side;
+          break;
+
+        case 2:
+        case 3:
+          displayText = '!'
+          break;
+
+        case 4:
+        case 5:
+          displayText = '#';
+          break;
+
+        default:
+      }
+
       if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id) $('td').removeClass('new');
-      $('.row' + row + ' .column' + column).addClass('chosen new').text(player.side).css('color', player.sidecolor).attr('data-side', player.side);
+      $('.row' + row + ' .column' + column).addClass('chosen new').text(displayText).css('color', player.sidecolor).attr('data-side', player.side);
 
     }
 

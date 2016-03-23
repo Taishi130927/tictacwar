@@ -61,6 +61,7 @@
     var id = -1;
     var player = new Player(0, 'warrior'),
         enemy = new Player(1, 'warrior');
+    player.myTurn = false;
     var game = new Game(player, enemy, board);
     // Game Initialization
     game.initialize();
