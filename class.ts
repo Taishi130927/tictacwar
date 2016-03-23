@@ -374,6 +374,8 @@ class Game {
       $('.progress-bar').removeClass('progress-bar-warning progress-bar-danger');
       $('.progress-bar').css('width', '100%');
 
+      this.player.sealed = Math.max(this.player.sealed - 1, 0);
+
       if (forced) {
 
           this.socket.json.emit('emit_from_client', {
@@ -389,6 +391,8 @@ class Game {
       this.player.myTurn = true;
       $('#indication2').text('Your turn!');
       this.countOn();
+
+      this.enemy.sealed = Math.max(this.enemy.sealed - 1, 0);
     }
   }
 
@@ -477,6 +481,7 @@ class Player {
   myTurn: boolean;
   energy: number;
   hero: Hero;
+  sealed: number;
 
   constructor(id: number, hero: Hero) {
 
@@ -493,6 +498,7 @@ class Player {
     this.sidecolor = properties[id][1];
     this.myTurn = turns[id];
     this.energy = energies[id];
+    this.sealed = 0;
 
   }
 }

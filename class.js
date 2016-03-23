@@ -251,6 +251,7 @@ var Game = (function () {
             clearTimeout(this.timerId);
             $('.progress-bar').removeClass('progress-bar-warning progress-bar-danger');
             $('.progress-bar').css('width', '100%');
+            this.player.sealed = Math.max(this.player.sealed - 1, 0);
             if (forced) {
                 this.socket.json.emit('emit_from_client', {
                     room: $('#roomSelector').val(),
@@ -262,6 +263,7 @@ var Game = (function () {
             this.player.myTurn = true;
             $('#indication2').text('Your turn!');
             this.countOn();
+            this.enemy.sealed = Math.max(this.enemy.sealed - 1, 0);
         }
     };
     Game.prototype.generateRandomMove = function () {
@@ -328,6 +330,7 @@ var Player = (function () {
         this.sidecolor = properties[id][1];
         this.myTurn = turns[id];
         this.energy = energies[id];
+        this.sealed = 0;
     }
     return Player;
 })();
