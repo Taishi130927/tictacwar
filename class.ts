@@ -404,7 +404,7 @@ class Game {
       gcolumn = Math.floor(Math.random() * this.board.subSize);
       var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
 
-      if (!(check === 1 || check === 0 || check === this.player.id + 2)) break;
+      if (check === undefined || check === 2 + this.enemy.id) break;
     }
 
     var row = grow * 3 + srow,

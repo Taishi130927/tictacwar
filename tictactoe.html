@@ -165,6 +165,14 @@
 
             if (game.board.subGrid[myMove.globalRow][myMove.globalColumn].grid[myMove.subRow][myMove.subColumn] === game.enemy.id) game.applyHeroPower(myMove);
 
+          } else if (game.player.hero.hid === 4 && $(this).hasClass('chosen')) {
+
+            var row1 = parseInt($(this).parent().attr('class').charAt(3)),
+                column1 = parseInt($(this).attr('class').charAt(6));
+            var myMove = new Move(row1, column1, game.player, false, 0);
+
+            if (game.board.subGrid[myMove.globalRow][myMove.globalColumn].grid[myMove.subRow][myMove.subColumn] === 4 + game.player.id) game.applyHeroPower(myMove);
+
           }
         } else if (game.player.myTurn) {
 
