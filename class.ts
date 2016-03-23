@@ -222,9 +222,6 @@ class Game {
 
             this.board.update(move, move.player.id + 2);
             this.board.display(move, move.player.id + 2);
-            // var row: number = move.globalRow * 3 + move.subRow;
-            // var column: number = move.globalColumn * 3 + move.subColumn;
-            // $('.row' + row + ' .column' + column).addClass('chosen new').text('!').css('color', move.player.sidecolor).attr('data-side', move.player.side);
 
             this.socket.json.emit('emit_secret_from_client', {
 
@@ -236,7 +233,6 @@ class Game {
 
             this.board.update(move, move.player.id)
             this.board.display(move, move.player.id);
-            //this.clearEnergy(true);
 
             this.socket.json.emit('emit_from_client', {
 
@@ -279,8 +275,17 @@ class Game {
 
         case 4: // warlock
 
+          this.board.update(move, move.player.id)
+          this.board.display(move, move.player.id + 4);
 
+          this.socket.json.emit('emit_from_client', {
 
+            room: $('#roomSelector').val(),
+            enemyMove: move
+
+          });
+
+          this.player.hero.miscCount--;
 
         case 5: // priest
         case 6: // pirate
@@ -289,7 +294,7 @@ class Game {
         default:
     }
 
-    if (this.player.hero.hid !== 0 || this.player.hero.miscCount === 0) {
+    if ((this.player.hero.hid !== 0 && this.player.hero.hid !== 4 )|| this.player.hero.miscCount === 0) {
 
         $('#indication2').text('Your Turn!');
         this.player.hero.powerOn = false;
@@ -318,6 +323,8 @@ class Game {
           $('#heroArea1 div').remove();
           $('#heroArea1').append('<div>charged: ' + this.player.hero.miscCount + '</div>');
 
+        } else if (this.player.hero.hid === 4) {
+          this.player.hero.miscCount += 2;
         }
       } else {
          $('.energy-bar1').removeClass('energy-bar-full');
@@ -402,7 +409,7 @@ class Game {
 
     var row = grow * 3 + srow,
         column = gcolumn * 3 + scolumn;
-    var rmove = new Move(row, column, this.player, true);
+    var rmove = new Move(row, column, this.player, true, this.player.id);
 
     return rmove;
   }
@@ -710,8 +717,9 @@ class SubBoard {
    subColumn: number;
    player: Player;
    random: boolean;
+   type: number;
 
-   constructor(row: number, column: number, player: Player, random: boolean) {
+   constructor(row: number, column: number, player: Player, random: boolean, type: number) {
 
     this.globalRow = Math.floor(row / 3);
     this.globalColumn = Math.floor(column / 3);
@@ -719,6 +727,7 @@ class SubBoard {
     this.subColumn = column % 3;
     this.player = player;
     this.random = random;
+    this.type = type;
 
   }
 
