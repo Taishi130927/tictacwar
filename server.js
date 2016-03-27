@@ -110,6 +110,6 @@ io.sockets.on('connection', function(socket){
   });
 
   socket.on('emit_seal_from_client', function(data) {
-    socket.broadcast.to(data.room).emit('emit_seal_from_enemy', data);
+    socket.broadcast.to(data).emit('emit_seal_from_enemy', data);
   });
 });

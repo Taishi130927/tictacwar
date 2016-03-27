@@ -175,105 +175,124 @@ class Game {
 
     switch (this.player.hero.hid) {
 
-        case 0: // warrior
+      case 0: // warrior
+
+        this.board.update(move);
+        this.board.display(move);
+
+        this.socket.json.emit('emit_from_client', {
+
+          room: $('#roomSelector').val(),
+          enemyMove: move
+
+        });
+
+        this.player.hero.miscCount--;
+        $('#heroArea1 div').remove();
+        $('#heroArea1').append('<div>charged: ' + this.player.hero.miscCount + '</div>');
+
+
+        break;
+
+      case 1: // mage
+
+        if (Math.floor(Math.random() * 2) === 0) {
+
+          move.player = new Player(this.enemy.id, this.player.hero);
+          move.player.energy = 0;
+          move.player.id = this.player.id;
+
+        }
+
+        this.board.update(move)
+        this.board.display(move);
+
+        this.socket.json.emit('emit_from_client', {
+
+          room: $('#roomSelector').val(),
+          enemyMove: move
+
+        });
+
+        break;
+
+      case 2: // hunter
+
+        if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== this.enemy.id + 2) {
 
           this.board.update(move);
           this.board.display(move);
 
-          this.socket.json.emit('emit_from_client', {
+          this.socket.json.emit('emit_secret_from_client', {
 
-              room: $('#roomSelector').val(),
-              enemyMove: move
+            room: $('#roomSelector').val(),
+            enemyMove: move
 
           });
-
-          this.player.hero.miscCount--;
-          $('#heroArea1 div').remove();
-          $('#heroArea1').append('<div>charged: ' + this.player.hero.miscCount + '</div>');
-
-
-          break;
-
-        case 1: // mage
-
-          if (Math.floor(Math.random() * 2) === 0) {
-
-              move.player = new Player(this.enemy.id, this.player.hero);
-              move.player.energy = 0;
-              move.player.id = this.player.id;
-
-          }
+        } else {
 
           this.board.update(move)
           this.board.display(move);
 
           this.socket.json.emit('emit_from_client', {
 
-              room: $('#roomSelector').val(),
-              enemyMove: move
+            room: $('#roomSelector').val(),
+            enemyMove: move
 
           });
+        }
 
-          break;
+        break;
 
-        case 2: // hunter
+      case 3: // rogue
 
-          if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== this.enemy.id + 2) {
+        this.board.update(move)
+        this.board.display(move);
 
-            this.board.update(move);
-            this.board.display(move);
+        this.socket.json.emit('emit_from_client', {
 
-            this.socket.json.emit('emit_secret_from_client', {
+          room: $('#roomSelector').val(),
+          enemyMove: move
 
-                room: $('#roomSelector').val(),
-                enemyMove: move
+        });
 
-            });
-          } else {
+        var transferredMove = this.generateRandomMove();
+        transferredMove.player = new Player(this.enemy.id, this.player.hero);
+        transferredMove.player.energy = 0;
+        transferredMove.random = false;
 
-            this.board.update(move)
-            this.board.display(move);
+        this.board.update(transferredMove);
+        this.board.display(transferredMove);
 
-            this.socket.json.emit('emit_from_client', {
+        this.socket.json.emit('emit_from_client', {
 
-                room: $('#roomSelector').val(),
-                enemyMove: move
+          room: $('#roomSelector').val(),
+          enemyMove: transferredMove
 
-            });
-          }
+        });
 
-          break;
+        break;
 
-        case 3: // rogue
+      case 4: // warlock
 
-          this.board.update(move)
-          this.board.display(move);
+        this.board.update(move)
+        this.board.display(move);
 
-          this.socket.json.emit('emit_from_client', {
+        this.socket.json.emit('emit_from_client', {
 
-              room: $('#roomSelector').val(),
-              enemyMove: move
+          room: $('#roomSelector').val(),
+          enemyMove: move
 
-          });
+        });
 
-          var transferredMove = this.generateRandomMove();
-          transferredMove.player = new Player(this.enemy.id, this.player.hero);
-          transferredMove.player.energy = 0;
-          transferredMove.random = false;
+        this.player.hero.miscCount--;
+        break;
 
-          this.board.update(transferredMove);
-          this.board.display(transferredMove);
+      case 5: // priest
+        break;
+      case 6: // pirate
 
-          this.socket.json.emit('emit_from_client', {
-
-              room: $('#roomSelector').val(),
-              enemyMove: transferredMove
-
-          });
-
-          break;
-
-        case 4: // warlock
+        if (this.player.hero.miscCount == 2) {
 
           this.board.update(move)
           this.board.display(move);
@@ -285,16 +304,67 @@ class Game {
 
           });
 
-          this.player.hero.miscCount--;
+        } else {
 
-        case 5: // priest
-        case 6: // pirate
-        case 7: // paladin
-        case 8: // ninja
-        default:
+          var lm: Move = this.board.lastMove;
+          this.board.update(lm)
+          this.board.display(lm);
+
+          this.socket.json.emit('emit_from_client', {
+
+            room: $('#roomSelector').val(),
+            enemyMove: lm
+
+          });
+
+          this.board.update(move)
+          this.board.display(move);
+
+          this.socket.json.emit('emit_from_client', {
+
+            room: $('#roomSelector').val(),
+            enemyMove: move
+
+          });
+
+          move.player = new Player(this.enemy.id, this.player.hero);
+          move.player.energy = 0;
+          move.player.id = this.player.id;
+
+          this.board.update(move)
+          this.board.display(move);
+
+          this.socket.json.emit('emit_from_client', {
+
+            room: $('#roomSelector').val(),
+            enemyMove: move
+
+          });
+
+        }
+
+        this.player.hero.miscCount--;
+        break;
+
+      case 7: // paladin
+      case 8: // ninja
+      default:
     }
 
-    if ((this.player.hero.hid !== 0 && this.player.hero.hid !== 4 )|| this.player.hero.miscCount === 0) {
+    if (this.player.hero.hid === 6 && this.player.hero.miscCount === 0) {
+
+      this.player.hero.powerOn = false;
+
+      this.socket.json.emit('emit_from_client', {
+
+        room: $('#roomSelector').val(),
+        enemyMove: null
+
+      });
+
+      this.switchTurn(false);
+
+    } else if ((this.player.hero.hid !== 0 && this.player.hero.hid !== 4 && this.player.hero.hid !== 6)|| this.player.hero.miscCount === 0) {
 
         $('#indication2').text('Your Turn!');
         this.player.hero.powerOn = false;
@@ -475,7 +545,8 @@ class Hero {
 
 class Player {
 
-  id: number;
+  id: number; //プレイヤー固有
+  sideNum: number; //ボードに保持する数値
   side: string;
   sidecolor: string;
   myTurn: boolean;
@@ -493,6 +564,7 @@ class Player {
     var energies: number[] = [0, 50];
 
     this.id = id;
+    this.sideNum = id;
     this.hero = hero;
     this.side = properties[id][0];
     this.sidecolor = properties[id][1];
@@ -552,7 +624,7 @@ class Board {
     if (this.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === undefined) {
       // when Hunter's or Rogue's ability is acviated
       alert('Ability Activated!');
-      if (!move.random) $('td').removeClass('new');
+      if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id) $('td').removeClass('new');
       $('.row' + row + ' .column' + column).removeClass('chosen').addClass('new').text('');
 
     } else {
@@ -657,19 +729,19 @@ class SubBoard {
     if (this.grid[move.subRow][move.subColumn] !== undefined) {
       this.grid[move.subRow][move.subColumn] = undefined;
     } else {
-      this.grid[move.subRow][move.subColumn] = move.type * 2 + move.player.id;
+      this.grid[move.subRow][move.subColumn] = move.type * 2 + move.player.sideNum;
     }
   }
 
   public occupationUpdate(move: Move): number {
 
-    if (move.player.id === this.occupant) {
+    if (move.player.sideNum === this.occupant) {
       return this.occupant;
     } else {
 
       var row = move.subRow,
           column = move.subColumn,
-          side = move.player.id;
+          side = move.player.sideNum;
 
       var horizInvalid = false,
           vertInvalid = false,
@@ -703,8 +775,8 @@ class SubBoard {
     }
 
     if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
-      this.occupant = move.player.id
-      return move.player.id;
+      this.occupant = move.player.sideNum
+      return move.player.sideNum;
     } else {
       return this.occupant;
     }

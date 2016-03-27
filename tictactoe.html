@@ -91,21 +91,17 @@
       if (game.player.myTurn && game.player.sealed === 0) {
       //console.log('test');
         if (game.player.hero.hid === 5 && game.player.energy === 100) {
-
-          game.socket.json.emit('emit_seal_from_client', {
-
-            room: $('#roomSelector').val(),
-            enemyMove: null
-
-          });
-
+          // priest
+          game.socket.emit('emit_seal_from_client', $('#roomSelector').val());
           game.socket.emit('emit_ability_from_client', $('#roomSelector').val());
 
           game.clearEnergy(true);
           alert('Ability Activated!');
+
         } else if ((game.player.hero.hid !== 0 && game.player.energy === 100 )|| (game.player.hero.hid === 0 && game.player.hero.miscCount !== 0)) {
 
           game.socket.emit('emit_ability_from_client', $('#roomSelector').val());
+          if (game.player.hero.hid === 6) game.player.hero.miscCount = 2;
 
           game.player.hero.powerOn = true;
           game.clearEnergy(true);
@@ -155,7 +151,29 @@
 
         if (game.player.hero.powerOn) {
 
-          if (game.player.hero.hid !== 3 && !$(this).hasClass('chosen')) {
+          if (game.player.hero.hid === 6) {
+            // pirate
+
+            if ($(this).hasClass('chosen')) {
+              if (game.player.hero.miscCount === 2 ) {
+
+                var row1 = parseInt($(this).parent().attr('class').charAt(3)),
+                    column1 = parseInt($(this).attr('class').charAt(6));
+                var myMove = new Move(row1, column1, game.player, false, 0);
+
+                if (game.board.subGrid[myMove.globalRow][myMove.globalColumn].grid[myMove.subRow][myMove.subColumn] === game.enemy.id ) game.applyHeroPower(myMove);
+
+              } else if (game.player.hero.miscCount === 1 ) {
+
+                var row1 = parseInt($(this).parent().attr('class').charAt(3)),
+                    column1 = parseInt($(this).attr('class').charAt(6));
+                var myMove = new Move(row1, column1, game.player, false, 0);
+
+                if (game.board.subGrid[myMove.globalRow][myMove.globalColumn].grid[myMove.subRow][myMove.subColumn] === game.player.id ) game.applyHeroPower(myMove);
+
+              }
+            }
+          } else if (game.player.hero.hid !== 3 && !$(this).hasClass('chosen')) {
 
             var row1 = parseInt($(this).parent().attr('class').charAt(3)),
                 column1 = parseInt($(this).attr('class').charAt(6));
@@ -171,7 +189,7 @@
             game.applyHeroPower(myMove);
 
           } else if (game.player.hero.hid === 3 && $(this).hasClass('chosen')) {
-
+            // rogue
             var row1 = parseInt($(this).parent().attr('class').charAt(3)),
                 column1 = parseInt($(this).attr('class').charAt(6));
             var myMove = new Move(row1, column1, game.player, false, 0);
@@ -179,7 +197,7 @@
             if (game.board.subGrid[myMove.globalRow][myMove.globalColumn].grid[myMove.subRow][myMove.subColumn] === game.enemy.id) game.applyHeroPower(myMove);
 
           } else if (game.player.hero.hid === 4 && $(this).hasClass('chosen')) {
-
+            // warlock
             var row1 = parseInt($(this).parent().attr('class').charAt(3)),
                 column1 = parseInt($(this).attr('class').charAt(6));
             var myMove = new Move(row1, column1, game.player, false, 0);

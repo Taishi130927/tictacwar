@@ -184,13 +184,57 @@ var Game = (function () {
                     enemyMove: move
                 });
                 this.player.hero.miscCount--;
-            case 5: // priest
-            case 6: // pirate
+                break;
+            case 5:
+                break;
+            case 6:
+                if (this.player.hero.miscCount == 2) {
+                    this.board.update(move);
+                    this.board.display(move);
+                    this.socket.json.emit('emit_from_client', {
+                        room: $('#roomSelector').val(),
+                        enemyMove: move
+                    });
+                }
+                else {
+                    var lm = this.board.lastMove;
+                    this.board.update(lm);
+                    this.board.display(lm);
+                    this.socket.json.emit('emit_from_client', {
+                        room: $('#roomSelector').val(),
+                        enemyMove: lm
+                    });
+                    this.board.update(move);
+                    this.board.display(move);
+                    this.socket.json.emit('emit_from_client', {
+                        room: $('#roomSelector').val(),
+                        enemyMove: move
+                    });
+                    move.player = new Player(this.enemy.id, this.player.hero);
+                    move.player.energy = 0;
+                    move.player.id = this.player.id;
+                    this.board.update(move);
+                    this.board.display(move);
+                    this.socket.json.emit('emit_from_client', {
+                        room: $('#roomSelector').val(),
+                        enemyMove: move
+                    });
+                }
+                this.player.hero.miscCount--;
+                break;
             case 7: // paladin
             case 8: // ninja
             default:
         }
-        if ((this.player.hero.hid !== 0 && this.player.hero.hid !== 4) || this.player.hero.miscCount === 0) {
+        if (this.player.hero.hid === 6 && this.player.hero.miscCount === 0) {
+            this.player.hero.powerOn = false;
+            this.socket.json.emit('emit_from_client', {
+                room: $('#roomSelector').val(),
+                enemyMove: null
+            });
+            this.switchTurn(false);
+        }
+        else if ((this.player.hero.hid !== 0 && this.player.hero.hid !== 4 && this.player.hero.hid !== 6) || this.player.hero.miscCount === 0) {
             $('#indication2').text('Your Turn!');
             this.player.hero.powerOn = false;
         }
@@ -325,6 +369,7 @@ var Player = (function () {
         var turns = [true, false];
         var energies = [0, 50];
         this.id = id;
+        this.sideNum = id;
         this.hero = hero;
         this.side = properties[id][0];
         this.sidecolor = properties[id][1];
@@ -360,7 +405,7 @@ var Board = (function () {
         if (this.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === undefined) {
             // when Hunter's or Rogue's ability is acviated
             alert('Ability Activated!');
-            if (!move.random)
+            if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id)
                 $('td').removeClass('new');
             $('.row' + row + ' .column' + column).removeClass('chosen').addClass('new').text('');
         }
@@ -428,15 +473,15 @@ var SubBoard = (function () {
             this.grid[move.subRow][move.subColumn] = undefined;
         }
         else {
-            this.grid[move.subRow][move.subColumn] = move.type * 2 + move.player.id;
+            this.grid[move.subRow][move.subColumn] = move.type * 2 + move.player.sideNum;
         }
     };
     SubBoard.prototype.occupationUpdate = function (move) {
-        if (move.player.id === this.occupant) {
+        if (move.player.sideNum === this.occupant) {
             return this.occupant;
         }
         else {
-            var row = move.subRow, column = move.subColumn, side = move.player.id;
+            var row = move.subRow, column = move.subColumn, side = move.player.sideNum;
             var horizInvalid = false, vertInvalid = false, diagInvalid1 = !(row === column), diagInvalid2 = !(row === this.size - 1 - column);
             for (var i = 0; i < this.size; i++) {
                 if (this.grid[row][i] !== side) {
@@ -458,8 +503,8 @@ var SubBoard = (function () {
             }
         }
         if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
-            this.occupant = move.player.id;
-            return move.player.id;
+            this.occupant = move.player.sideNum;
+            return move.player.sideNum;
         }
         else {
             return this.occupant;
