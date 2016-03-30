@@ -1,6 +1,23 @@
 /// <reference path="lib/jquery.d.ts" />
 /// <reference path="lib/socket.io.d.ts" />
 /// <reference path="lib/mathjs.d.ts" />
+if (!Array.prototype.every) {
+    Array.prototype.every = function (fun /*, thisp */) {
+        "use strict";
+        if (this == null)
+            throw new TypeError();
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (typeof fun != "function")
+            throw new TypeError();
+        var thisp = arguments[1];
+        for (var i = 0; i < len; i++) {
+            if (i in t && !fun.call(thisp, t[i], i, t))
+                return false;
+        }
+        return true;
+    };
+}
 var Game = (function () {
     function Game(player, enemy, board) {
         this.player = player;
@@ -222,11 +239,30 @@ var Game = (function () {
                 }
                 this.player.hero.miscCount--;
                 break;
-            case 7: // paladin
-            case 8: // ninja
+            case 7:
+                this.player.hero.miscCount = move.globalRow * this.board.subSize + move.globalColumn + 1;
+                break;
+            case 8:
+                if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] !== this.enemy.id + 2) {
+                    this.board.update(move);
+                    this.board.display(move);
+                    this.socket.json.emit('emit_secret_from_client', {
+                        room: $('#roomSelector').val(),
+                        enemyMove: move
+                    });
+                }
+                else {
+                    this.board.update(move);
+                    this.board.display(move);
+                    this.socket.json.emit('emit_from_client', {
+                        room: $('#roomSelector').val(),
+                        enemyMove: move
+                    });
+                }
+                break;
             default:
         }
-        if (this.player.hero.hid === 6 && this.player.hero.miscCount === 0) {
+        if ((this.player.hero.hid === 6 || this.player.hero.hid === 8) && this.player.hero.miscCount === 0) {
             this.player.hero.powerOn = false;
             this.socket.json.emit('emit_from_client', {
                 room: $('#roomSelector').val(),
@@ -313,11 +349,23 @@ var Game = (function () {
     Game.prototype.generateRandomMove = function () {
         var srow, scolumn, grow, gcolumn;
         while (true) {
-            srow = Math.floor(Math.random() * this.board.subSize);
-            scolumn = Math.floor(Math.random() * this.board.subSize);
-            grow = Math.floor(Math.random() * this.board.subSize);
-            gcolumn = Math.floor(Math.random() * this.board.subSize);
-            var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
+            // need ways to stop infinite loops
+            if (this.player.hero.hid === 7 && this.player.hero.miscCount > 0) {
+                grow = Math.floor((this.player.hero.miscCount - 1) / 3);
+                gcolumn = (this.player.hero.miscCount - 1) % 3;
+                if (!this.board.subGrid[grow][gcolumn].grid.some(function (v) { return v.includes(undefined); }))
+                    return null;
+                srow = Math.floor(Math.random() * this.board.subSize);
+                scolumn = Math.floor(Math.random() * this.board.subSize);
+                var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
+            }
+            else {
+                srow = Math.floor(Math.random() * this.board.subSize);
+                scolumn = Math.floor(Math.random() * this.board.subSize);
+                grow = Math.floor(Math.random() * this.board.subSize);
+                gcolumn = Math.floor(Math.random() * this.board.subSize);
+                var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
+            }
             if (check === undefined || check === 2 + this.enemy.id)
                 break;
         }
