@@ -581,6 +581,8 @@ class Hero {
     ninja = 8
   }
 
+  var urlString: string = "http://52.69.174.208:1337/img/";
+
   var HeroURLs: {
     warrior: string;
     mage: string;
@@ -593,15 +595,15 @@ class Hero {
     ninja: string;
   }
   = {
-    warrior: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/rona.png",
-    mage: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/celeste.png",
-    hunter: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/ringo.png",
-    rogue: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/glaive.png",
-    warlock: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/krul.png",
-    priest: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/reim.png",
-    pirate: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/koshka.png",
-    paladin: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/blackfeather.png",
-    ninja: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/taka.png"
+    warrior: urlString + "rona.png",
+    mage: urlString + "celeste.png",
+    hunter: urlString + "ringo.png",
+    rogue: urlString + "glaive.png",
+    warlock: urlString + "krul.png",
+    priest: urlString + "reim.png",
+    pirate: urlString + "koshka.png",
+    paladin: urlString + "blackfeather.png",
+    ninja: urlString + "taka.png"
   };
 
     this.hname = heroname;

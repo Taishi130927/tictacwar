@@ -44,7 +44,23 @@ function handler(req, res) {
       break;
 
     case /\/img\/[a-z]*/.test(req.url):
-      requestProcessor(res, 'img/' + req.url.match(/[a-z.]*$/)[0], 'image/png');
+      // requestProcessor(res, 'img/' + req.url.match(/[a-z.]*$/)[0], 'image/png');
+
+      fs.readFile(__dirname + '/img/' + req.url.match(/[a-z.]*$/)[0], 'binary', function(err, data) {
+
+        if (err) {
+
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.write("not found!");
+            return res.end();
+
+        }
+
+        res.writeHead(200, {'Content-Type': 'image/png'});
+        res.write(data, 'binary');
+        res.end();
+
+      });
       //console.log('img/' + req.url.match(/[a-z.]*$/)[0]);
       break;
 

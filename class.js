@@ -374,7 +374,7 @@ var Game = (function () {
         return rmove;
     };
     return Game;
-})();
+}());
 var Hero = (function () {
     function Hero(heroname) {
         var Heroes;
@@ -389,16 +389,17 @@ var Hero = (function () {
             Heroes[Heroes["paladin"] = 7] = "paladin";
             Heroes[Heroes["ninja"] = 8] = "ninja";
         })(Heroes || (Heroes = {}));
+        var urlString = "http://52.69.174.208:1337/img/";
         var HeroURLs = {
-            warrior: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/rona.png",
-            mage: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/celeste.png",
-            hunter: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/ringo.png",
-            rogue: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/glaive.png",
-            warlock: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/krul.png",
-            priest: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/reim.png",
-            pirate: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/koshka.png",
-            paladin: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/blackfeather.png",
-            ninja: "http://www.vaingloryfire.com/images/wikibase/icon/heroes/taka.png"
+            warrior: urlString + "rona.png",
+            mage: urlString + "celeste.png",
+            hunter: urlString + "ringo.png",
+            rogue: urlString + "glaive.png",
+            warlock: urlString + "krul.png",
+            priest: urlString + "reim.png",
+            pirate: urlString + "koshka.png",
+            paladin: urlString + "blackfeather.png",
+            ninja: urlString + "taka.png"
         };
         this.hname = heroname;
         this.hid = Heroes[heroname];
@@ -407,7 +408,7 @@ var Hero = (function () {
         this.miscCount = 0;
     }
     return Hero;
-})();
+}());
 var Player = (function () {
     function Player(id, hero) {
         var properties = [
@@ -426,7 +427,7 @@ var Player = (function () {
         this.sealed = 0;
     }
     return Player;
-})();
+}());
 var Board = (function () {
     function Board(size) {
         this.size = size;
@@ -505,7 +506,7 @@ var Board = (function () {
         return !(horiz || vert || diag1 || diag2);
     };
     return Board;
-})();
+}());
 var SubBoard = (function () {
     function SubBoard(size) {
         this.size = size;
@@ -559,7 +560,7 @@ var SubBoard = (function () {
         }
     };
     return SubBoard;
-})();
+}());
 var Move = (function () {
     function Move(row, column, player, random, type) {
         this.globalRow = Math.floor(row / 3);
@@ -571,4 +572,4 @@ var Move = (function () {
         this.type = type;
     }
     return Move;
-})();
+}());
