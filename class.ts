@@ -137,6 +137,7 @@ class Game {
     if (move.player === this.player) {
 
       if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === this.enemy.id + 2) {
+        // Stepped on a trap
 
           this.clearEnergy(true);
           this.board.update(move)
@@ -268,6 +269,7 @@ class Game {
 
       case 3: // rogue
 
+        move.destructive = true;
         this.board.update(move)
         this.board.display(move);
 
@@ -316,7 +318,8 @@ class Game {
 
         if (this.player.hero.miscCount == 2) {
 
-          this.board.update(move)
+          move.destructive = true;
+          this.board.update(move);
           this.board.display(move);
 
           this.socket.json.emit('emit_from_client', {
@@ -329,6 +332,7 @@ class Game {
         } else {
 
           var lm: Move = this.board.lastMove;
+          lm.destructive = false;
           this.board.update(lm)
           this.board.display(lm);
 
@@ -543,9 +547,6 @@ class Game {
         grow = Math.floor(Math.random() * this.board.subSize);
         gcolumn = Math.floor(Math.random() * this.board.subSize);
         var check = this.board.subGrid[grow][gcolumn].grid[srow][scolumn];
-        // console.log(this.board.subGrid[grow][gcolumn].grid);
-        //   console.log(this.board.subGrid[grow][gcolumn].grid.some(v => v.includes(undefined)));
-
       }
 
       if (check === undefined || check === 2 + this.enemy.id) break;
@@ -579,7 +580,7 @@ class Hero {
     pirate = 6,
     paladin = 7,
     ninja = 8
-  }
+    };
 
   var urlString: string = "http://52.69.174.208:1337/img/";
 
@@ -659,8 +660,8 @@ class Board {
 
   public update(move: Move): void {
 
-    this.subGrid[move.globalRow][move.globalColumn].update(move);
-    this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move)
+      this.subGrid[move.globalRow][move.globalColumn].update(move);
+      this.globalGrid[move.globalRow][move.globalColumn] = this.subGrid[move.globalRow][move.globalColumn].occupationUpdate(move);
 
   }
 
@@ -669,6 +670,7 @@ class Board {
     var player = move.player;
     var row = 3 * move.globalRow + move.subRow,
         column = 3 * move.globalColumn + move.subColumn;
+    var occupant = this.globalGrid[move.globalRow][move.globalColumn];
 
     if (this.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === undefined) {
       // when Hunter's or Rogue's ability is acviated
@@ -676,13 +678,14 @@ class Board {
       if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id) $('td').removeClass('new');
       $('.row' + row + ' .column' + column).removeClass('chosen').addClass('new').text('');
 
+      if (occupant === -1) $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).removeAttr('data-occupant');
+
     } else {
 
-      var occupant = this.globalGrid[move.globalRow][move.globalColumn];
-
       if (occupant !== -1) {
-
         $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
+      } else {
+        $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).removeAttr('data-occupant');
       }
 
       var displayText: string;
@@ -784,52 +787,104 @@ class SubBoard {
 
   public occupationUpdate(move: Move): number {
 
+    // console.log(move.player.sideNum);
+
     if (move.player.sideNum === this.occupant) {
       return this.occupant;
     } else {
 
-      var row = move.subRow,
+      if (move.destructive) {
+
+        var side = (move.player.sideNum + 1) % 2;
+        // var side = move.player.sideNum;
+
+        var horizInvalid = false,
+          vertInvalid = false,
+          diagInvalid1 = false,
+          diagInvalid2 = false;
+
+        for (var i = 0; i < this.size; i++) {
+
+          horizInvalid = false;
+          vertInvalid = false;
+
+          for (var j = 0; j < this.size; j++){
+
+            if (this.grid[i][j] !== side) {
+              horizInvalid = true;
+            }
+
+            if (this.grid[j][i] !== side) {
+              vertInvalid = true;
+            }
+          }
+
+          if (!horizInvalid || !vertInvalid) {
+            return this.occupant;
+          }
+
+          if (this.grid[i][i] !== side) {
+            diagInvalid1 = true;
+          }
+
+          if (this.grid[i][this.size - 1 - i] !== side) {
+            diagInvalid2 = true;
+          }
+        }
+
+        if (!diagInvalid1 || !diagInvalid2) {
+          return this.occupant;
+        } else {
+
+          this.occupant = -1;
+          return this.occupant;
+
+        }
+
+      } else {
+
+        var row = move.subRow,
           column = move.subColumn,
           side = move.player.sideNum;
 
-      var horizInvalid = false,
+        var horizInvalid = false,
           vertInvalid = false,
           diagInvalid1 = !(row === column),
           diagInvalid2 = !(row === this.size - 1 - column);
 
-      for (var i = 0; i < this.size; i++){
+        for (var i = 0; i < this.size; i++) {
 
-        if (this.grid[row][i] !== side){
-          horizInvalid = true;
-        }
-
-        if (this.grid[i][column] !== side){
-          vertInvalid = true;
-        }
-      }
-
-      if (!diagInvalid1 || !diagInvalid2){
-
-        for (var i = 0; i < this.size; i++){
-
-          if (this.grid[i][i] !== side){
-            diagInvalid1 = true;
+          if (this.grid[row][i] !== side) {
+            horizInvalid = true;
           }
 
-          if (this.grid[i][this.size - 1 -i] !== side){
-            diagInvalid2 = true;
+          if (this.grid[i][column] !== side) {
+            vertInvalid = true;
           }
+        }
+
+        if (!diagInvalid1 || !diagInvalid2) {
+
+          for (var i = 0; i < this.size; i++) {
+
+            if (this.grid[i][i] !== side) {
+              diagInvalid1 = true;
+            }
+
+            if (this.grid[i][this.size - 1 - i] !== side) {
+              diagInvalid2 = true;
+            }
+          }
+        }
+
+        if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
+          this.occupant = move.player.sideNum
+          return move.player.sideNum;
+        } else {
+          return this.occupant;
         }
       }
     }
-
-    if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
-      this.occupant = move.player.sideNum
-      return move.player.sideNum;
-    } else {
-      return this.occupant;
-    }
-
   }
 }
 
@@ -842,8 +897,9 @@ class SubBoard {
    player: Player;
    random: boolean;
    type: number;
+   destructive: boolean;
 
-   constructor(row: number, column: number, player: Player, random: boolean, type: number) {
+   constructor(row: number, column: number, player: Player, random: boolean, type: number, destructive = false) {
 
     this.globalRow = Math.floor(row / 3);
     this.globalColumn = Math.floor(column / 3);
@@ -852,6 +908,7 @@ class SubBoard {
     this.player = player;
     this.random = random;
     this.type = type;
+    this.destructive = destructive;
 
   }
 

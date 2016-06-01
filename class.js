@@ -91,6 +91,7 @@ var Game = (function () {
     Game.prototype.processMove = function (move) {
         if (move.player === this.player) {
             if (this.board.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === this.enemy.id + 2) {
+                // Stepped on a trap
                 this.clearEnergy(true);
                 this.board.update(move);
                 this.board.display(move);
@@ -176,6 +177,7 @@ var Game = (function () {
                 }
                 break;
             case 3:
+                move.destructive = true;
                 this.board.update(move);
                 this.board.display(move);
                 this.socket.json.emit('emit_from_client', {
@@ -206,6 +208,7 @@ var Game = (function () {
                 break;
             case 6:
                 if (this.player.hero.miscCount == 2) {
+                    move.destructive = true;
                     this.board.update(move);
                     this.board.display(move);
                     this.socket.json.emit('emit_from_client', {
@@ -215,6 +218,7 @@ var Game = (function () {
                 }
                 else {
                     var lm = this.board.lastMove;
+                    lm.destructive = false;
                     this.board.update(lm);
                     this.board.display(lm);
                     this.socket.json.emit('emit_from_client', {
@@ -389,6 +393,7 @@ var Hero = (function () {
             Heroes[Heroes["paladin"] = 7] = "paladin";
             Heroes[Heroes["ninja"] = 8] = "ninja";
         })(Heroes || (Heroes = {}));
+        ;
         var urlString = "http://52.69.174.208:1337/img/";
         this.hname = heroname;
         this.hid = Heroes[heroname];
@@ -440,17 +445,22 @@ var Board = (function () {
     Board.prototype.display = function (move) {
         var player = move.player;
         var row = 3 * move.globalRow + move.subRow, column = 3 * move.globalColumn + move.subColumn;
+        var occupant = this.globalGrid[move.globalRow][move.globalColumn];
         if (this.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === undefined) {
             // when Hunter's or Rogue's ability is acviated
             alert('Ability Activated!');
             if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id)
                 $('td').removeClass('new');
             $('.row' + row + ' .column' + column).removeClass('chosen').addClass('new').text('');
+            if (occupant === -1)
+                $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).removeAttr('data-occupant');
         }
         else {
-            var occupant = this.globalGrid[move.globalRow][move.globalColumn];
             if (occupant !== -1) {
                 $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).attr('data-occupant', occupant);
+            }
+            else {
+                $('.globalRow' + move.globalRow + ' .globalColumn' + move.globalColumn).removeAttr('data-occupant');
             }
             var displayText;
             switch (move.type) {
@@ -515,22 +525,29 @@ var SubBoard = (function () {
         }
     };
     SubBoard.prototype.occupationUpdate = function (move) {
+        // console.log(move.player.sideNum);
         if (move.player.sideNum === this.occupant) {
             return this.occupant;
         }
         else {
-            var row = move.subRow, column = move.subColumn, side = move.player.sideNum;
-            var horizInvalid = false, vertInvalid = false, diagInvalid1 = !(row === column), diagInvalid2 = !(row === this.size - 1 - column);
-            for (var i = 0; i < this.size; i++) {
-                if (this.grid[row][i] !== side) {
-                    horizInvalid = true;
-                }
-                if (this.grid[i][column] !== side) {
-                    vertInvalid = true;
-                }
-            }
-            if (!diagInvalid1 || !diagInvalid2) {
+            if (move.destructive) {
+                var side = (move.player.sideNum + 1) % 2;
+                // var side = move.player.sideNum;
+                var horizInvalid = false, vertInvalid = false, diagInvalid1 = false, diagInvalid2 = false;
                 for (var i = 0; i < this.size; i++) {
+                    horizInvalid = false;
+                    vertInvalid = false;
+                    for (var j = 0; j < this.size; j++) {
+                        if (this.grid[i][j] !== side) {
+                            horizInvalid = true;
+                        }
+                        if (this.grid[j][i] !== side) {
+                            vertInvalid = true;
+                        }
+                    }
+                    if (!horizInvalid || !vertInvalid) {
+                        return this.occupant;
+                    }
                     if (this.grid[i][i] !== side) {
                         diagInvalid1 = true;
                     }
@@ -538,20 +555,50 @@ var SubBoard = (function () {
                         diagInvalid2 = true;
                     }
                 }
+                if (!diagInvalid1 || !diagInvalid2) {
+                    return this.occupant;
+                }
+                else {
+                    this.occupant = -1;
+                    return this.occupant;
+                }
             }
-        }
-        if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
-            this.occupant = move.player.sideNum;
-            return move.player.sideNum;
-        }
-        else {
-            return this.occupant;
+            else {
+                var row = move.subRow, column = move.subColumn, side = move.player.sideNum;
+                var horizInvalid = false, vertInvalid = false, diagInvalid1 = !(row === column), diagInvalid2 = !(row === this.size - 1 - column);
+                for (var i = 0; i < this.size; i++) {
+                    if (this.grid[row][i] !== side) {
+                        horizInvalid = true;
+                    }
+                    if (this.grid[i][column] !== side) {
+                        vertInvalid = true;
+                    }
+                }
+                if (!diagInvalid1 || !diagInvalid2) {
+                    for (var i = 0; i < this.size; i++) {
+                        if (this.grid[i][i] !== side) {
+                            diagInvalid1 = true;
+                        }
+                        if (this.grid[i][this.size - 1 - i] !== side) {
+                            diagInvalid2 = true;
+                        }
+                    }
+                }
+                if (!horizInvalid || !vertInvalid || !diagInvalid1 || !diagInvalid2) {
+                    this.occupant = move.player.sideNum;
+                    return move.player.sideNum;
+                }
+                else {
+                    return this.occupant;
+                }
+            }
         }
     };
     return SubBoard;
 }());
 var Move = (function () {
-    function Move(row, column, player, random, type) {
+    function Move(row, column, player, random, type, destructive) {
+        if (destructive === void 0) { destructive = false; }
         this.globalRow = Math.floor(row / 3);
         this.globalColumn = Math.floor(column / 3);
         this.subRow = row % 3;
@@ -559,6 +606,7 @@ var Move = (function () {
         this.player = player;
         this.random = random;
         this.type = type;
+        this.destructive = destructive;
     }
     return Move;
 }());
