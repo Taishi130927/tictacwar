@@ -583,32 +583,9 @@ class Hero {
 
   var urlString: string = "http://52.69.174.208:1337/img/";
 
-  var HeroURLs: {
-    warrior: string;
-    mage: string;
-    hunter: string;
-    rogue: string;
-    warlock: string;
-    priest: string;
-    pirate: string;
-    paladin: string;
-    ninja: string;
-  }
-  = {
-    warrior: urlString + "rona.png",
-    mage: urlString + "celeste.png",
-    hunter: urlString + "ringo.png",
-    rogue: urlString + "glaive.png",
-    warlock: urlString + "krul.png",
-    priest: urlString + "reim.png",
-    pirate: urlString + "koshka.png",
-    paladin: urlString + "blackfeather.png",
-    ninja: urlString + "taka.png"
-  };
-
     this.hname = heroname;
     this.hid = Heroes[heroname];
-    this.hurl = HeroURLs[heroname];
+    this.hurl = urlString + heroname + ".png";
     this.powerOn = false;
     this.miscCount = 0;
 
