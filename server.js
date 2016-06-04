@@ -31,8 +31,8 @@ function handler(req, res) {
       requestProcessor(res, 'tictactoe.html', 'text/html');
       break;
 
-    case /\/class.js/.test(req.url):
-      requestProcessor(res, 'class.js', 'text/javascript');
+    case /\/ts-js\/[a-zA-Z]*.js/.test(req.url):
+      requestProcessor(res, 'ts-js/' + req.url.match(/[a-zA-Z.]*$/)[0], 'text/javascript');
       break;
 
     case /\/function.js/.test(req.url):
