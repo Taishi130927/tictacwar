@@ -35,6 +35,10 @@ function handler(req, res) {
       requestProcessor(res, 'ts-js/' + req.url.match(/[a-zA-Z.]*$/)[0], 'text/javascript');
       break;
 
+    case /\/functions\/[a-zA-Z]*.js/.test(req.url):
+      requestProcessor(res, 'functions/' + req.url.match(/[a-zA-Z.]*$/)[0], 'text/javascript');
+    break;
+
     case /\/function.js/.test(req.url):
       requestProcessor(res, 'function.js', 'text/javascript');
       break;
