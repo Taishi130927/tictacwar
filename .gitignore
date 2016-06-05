@@ -1,4 +1,4 @@
-bootstrap/
 fonts/
-js/
+lib/
 node_modules/
+.netrc
