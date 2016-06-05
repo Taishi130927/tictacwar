@@ -277,9 +277,6 @@ var Game = (function () {
                     $('#heroArea1 div').remove();
                     $('#heroArea1').append('<div>charged: ' + this.player.hero.miscCount + '</div>');
                 }
-                else if (this.player.hero.hid === 4) {
-                    this.player.hero.miscCount += 2;
-                }
             }
             else {
                 $('.energy-bar1').removeClass('energy-bar-full');

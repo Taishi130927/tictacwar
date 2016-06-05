@@ -24,7 +24,7 @@ var Board = (function () {
         var occupant = this.globalGrid[move.globalRow][move.globalColumn];
         if (this.subGrid[move.globalRow][move.globalColumn].grid[move.subRow][move.subColumn] === undefined) {
             // when Hunter's or Rogue's ability is acviated
-            alert('Ability Activated!');
+            $('#indication2').text('Ability Activated!');
             if (this.lastMove !== undefined && move.player.id !== this.lastMove.player.id)
                 $('td').removeClass('new');
             $('.row' + row + ' .column' + column).removeClass('chosen').addClass('new').text('');

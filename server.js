@@ -31,7 +31,7 @@ function handler(req, res) {
       requestProcessor(res, 'view/tictactoe.html', 'text/html');
       break;
 
-    case /\[a-zA-z].html/.test(req.url) :
+    case /\/[a-zA-z]*.html/.test(req.url) :
       requestProcessor(res, 'view/' + req.url.match(/[a-zA-Z.]*$/)[0], 'text/html');
     break;
 

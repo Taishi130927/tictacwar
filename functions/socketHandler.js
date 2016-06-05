@@ -55,7 +55,7 @@ game.socket.on('emit_ability_from_enemy', function(data) {
     alert('Ability Activated!');
 
   }
-  console.log(data.hero);
+  // console.log(data.hero);
   game.clearEnergy(false);
 
 });

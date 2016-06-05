@@ -23,7 +23,7 @@ $('#icon1').click(function() {
 
       });
 
-      if (game.player.hero.hid === 6) game.player.hero.miscCount = 2;
+      if (game.player.hero.hid === 6 || game.player.hero.hid === 4) game.player.hero.miscCount = 2;
 
       game.player.hero.powerOn = true;
       game.clearEnergy(true);
