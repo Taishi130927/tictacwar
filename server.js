@@ -28,8 +28,12 @@ function handler(req, res) {
   switch (true) {
 
     case /\u002f$/.test(req.url) :
-      requestProcessor(res, 'tictactoe.html', 'text/html');
+      requestProcessor(res, 'view/tictactoe.html', 'text/html');
       break;
+
+    case /\[a-zA-z].html/.test(req.url) :
+      requestProcessor(res, 'view/' + req.url.match(/[a-zA-Z.]*$/)[0], 'text/html');
+    break;
 
     case /\/ts-js\/[a-zA-Z]*.js/.test(req.url):
       requestProcessor(res, 'ts-js/' + req.url.match(/[a-zA-Z.]*$/)[0], 'text/javascript');
@@ -38,10 +42,6 @@ function handler(req, res) {
     case /\/functions\/[a-zA-Z]*.js/.test(req.url):
       requestProcessor(res, 'functions/' + req.url.match(/[a-zA-Z.]*$/)[0], 'text/javascript');
     break;
-
-    case /\/function.js/.test(req.url):
-      requestProcessor(res, 'function.js', 'text/javascript');
-      break;
 
     case /\/style.css/.test(req.url):
       requestProcessor(res, 'css/style.css', 'text/css');
